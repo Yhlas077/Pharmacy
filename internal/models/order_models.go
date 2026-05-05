@@ -1,0 +1,13 @@
+package models
+
+type Orders struct {
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Description string  `json:"description"`
+}
+
+type OrdersErrorResponse struct {
+	Message string `json:"message"`
+	Code    string `json:"code"`
+}
