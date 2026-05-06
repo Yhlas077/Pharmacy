@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
+	"github.com/yhlas/basic-pharmacy/internal/repositories"
 
 	"github.com/gin-gonic/gin"
 )
 
-// POST /pharmacy
+// POST /Pharmacies  // controllers
 func PharmacyCreate(c *gin.Context) {
+
 	var req models.Pharmacies
 
 	if err := c.BindJSON(&req); err != nil {
@@ -18,41 +19,29 @@ func PharmacyCreate(c *gin.Context) {
 		return
 	}
 
-	_, err := utils.GetDB().Exec(c.Request.Context(),
-		"INSERT INTO pharmacies(id, name, address, pharmacy_hours) VALUES ($1,$2,$3,$4)",
-		req.ID, req.Name, req.Address, req.Pharmacy_hours,
-	)
+	_, err := repositories.PharmacyCreate(c.Request.Context(), req)
 
 	if err != nil {
-		c.JSON(500, models.PharmacyErrorResponse{err.Error(), "500"})
-		return
+		c.JSON(500, models.PharmacyErrorResponse{err.Error(), "400"})
 	}
 
 	c.JSON(200, true)
 }
 
-// GET /pharmacy
+// GET /Pharmacies
 func PharmacyList(c *gin.Context) {
-	rows, err := utils.GetDB().Query(c.Request.Context(),
-		"SELECT id, name, address, pharmacy_hours FROM pharmacies")
 
-	if err != nil {
-		c.JSON(500, models.PharmacyErrorResponse{err.Error(), "500"})
-		return
-	}
-	defer rows.Close()
-
+	var filter repositories.PharmacyFilter
 	var list []models.Pharmacies
 
-	for rows.Next() {
-		var e models.Pharmacies
+	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
+	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
 
-		if err := rows.Scan(&e.ID, &e.Name, &e.Address, &e.Pharmacy_hours); err != nil {
-			c.JSON(500, models.PharmacyErrorResponse{err.Error(), "500"})
-			return
-		}
+	list, err := repositories.PharmacyList(c.Request.Context(), filter)
 
-		list = append(list, e)
+	if err != nil {
+		c.JSON(400, false)
+		return
 	}
 
 	c.JSON(200, gin.H{
@@ -60,61 +49,55 @@ func PharmacyList(c *gin.Context) {
 	})
 }
 
-// DELETE /pharmacies/:id
+// DELETE /Pharmacies/:id
 func PharmacyDelete(c *gin.Context) {
-	idStr := c.Param("id")
-
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
-	res, err := utils.GetDB().Exec(c.Request.Context(),
-		"DELETE FROM pharmacies WHERE id=$1", id)
-
-	if err != nil || res.RowsAffected() == 0 {
-		c.JSON(500, false)
+	err = repositories.PharmacyDelete(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
-// PUT /phramacies/:id
+// PUT /Pharmacies/:id
 func PharmacyUpdate(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
 	var req models.Pharmacies
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, models.PharmacyErrorResponse{err.Error(), "400"})
+		c.JSON(400, err.Error())
 		return
 	}
 
-	_, err = utils.GetDB().Exec(c.Request.Context(),
-		"UPDATE pharmacies SET id=$1, name=$2, address=$3, pharmacy_hours=$4 WHERE id=$5",
-		req.ID, req.Name, req.Address, req.Pharmacy_hours, id,
-	)
-
+	err = repositories.PharmacyUpdate(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(500, models.PharmacyErrorResponse{err.Error(), "500"})
+		c.JSON(500, err.Error())
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
 // ENDPOINT
 func PharmacyRoutes(r *gin.Engine) {
-	r.POST("/pharmacy", PharmacyCreate)
-	r.GET("/pharmacy", PharmacyList)
-	r.DELETE("/pharmacy/:id", PharmacyDelete)
-	r.PUT("/pharmacy/:id", PharmacyUpdate)
+	r.POST("/pharmacies", PharmacyCreate)
+	r.GET("/pharmacies", PharmacyList)
+	r.DELETE("/pharmacies/:id", PharmacyDelete)
+	r.PUT("/pharmacies/:id", PharmacyUpdate)
 }

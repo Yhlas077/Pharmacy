@@ -12,7 +12,9 @@ type PharmacyMedicineFilter struct {
 	Offset int
 }
 
-func Pharmacy_Medicine_List(c context.Context, f PharmacyMedicineFilter, moreArg ...int) ([]models.Pharmacy_medicines, error) {
+// GET
+func PharmacyMedicineList(c context.Context, f PharmacyMedicineFilter) ([]models.PharmacyMedicines, error) {
+
 	db := utils.GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
@@ -25,14 +27,54 @@ func Pharmacy_Medicine_List(c context.Context, f PharmacyMedicineFilter, moreArg
 		return nil, err
 	}
 
-	list := []models.Pharmacy_medicines{}
+	list := []models.PharmacyMedicines{}
 
 	defer rows.Close()
 
 	for rows.Next() {
-		item := models.Pharmacy_medicines{}
-		rows.Scan(&item.ID, &item.Name, &item.Description, &item.Price, &item.New_price, &item.Category_id)
+		item := models.PharmacyMedicines{}
+		err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.Price, &item.New_price, &item.Category_id)
+		if err != nil {
+			return nil, err
+		}
 		list = append(list, item)
 	}
 	return list, nil
+}
+
+// POST /users // repository
+func PharmacyMedicineCreate(c context.Context, pharmacy_medicine models.PharmacyMedicines) (models.PharmacyMedicines, error) {
+
+	_, err := utils.GetDB().Exec(context.Background(),
+		"INSERT INTO pharmacy_medicines(id, name, description, price, new_price, category_id) VALUES ($1,$2,$3,$4,$5,$6)",
+		pharmacy_medicine.ID, pharmacy_medicine.Name, pharmacy_medicine.Description, pharmacy_medicine.Price, pharmacy_medicine.New_price, pharmacy_medicine.Category_id,
+	)
+	if err != nil {
+		return models.PharmacyMedicines{}, err
+	}
+	return pharmacy_medicine, nil
+}
+
+func PharmacyMedicineDelete(c context.Context, id int) error {
+	db := utils.GetDB()
+
+	_, err := db.Exec(c,
+		`DELETE FROM pharmacy_medicines WHERE id=$1`,
+		id,
+	)
+
+	return err
+}
+
+func PharmacyMedicineUpdate(c context.Context, id int, req models.PharmacyMedicines) error {
+	db := utils.GetDB()
+
+	_, err := db.Exec(c,
+		`UPDATE pharmacy_medicines
+		 SET name=$1, description=$2, price=$3, new_price=$4, category_id=$5 
+		 WHERE id=$6`,
+		req.Name, req.Description, req.Price, req.New_price, req.Category_id, id,
+	)
+
+	return err
 }

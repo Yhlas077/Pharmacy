@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
+	"github.com/yhlas/basic-pharmacy/internal/repositories"
 
 	"github.com/gin-gonic/gin"
 )
 
-// POST /orders
-func OrderCreate(c *gin.Context) {
+// POST /Orders  // controllers
+func OrdersCreate(c *gin.Context) {
+
 	var req models.Orders
 
 	if err := c.BindJSON(&req); err != nil {
@@ -18,41 +19,29 @@ func OrderCreate(c *gin.Context) {
 		return
 	}
 
-	_, err := utils.GetDB().Exec(c.Request.Context(),
-		"INSERT INTO orders(id, name, price, description) VALUES ($1,$2,$3,$4)",
-		req.ID, req.Name, req.Price, req.Description,
-	)
+	_, err := repositories.OrdersCreate(c.Request.Context(), req)
 
 	if err != nil {
-		c.JSON(500, models.OrdersErrorResponse{err.Error(), "500"})
-		return
+		c.JSON(500, models.OrdersErrorResponse{err.Error(), "400"})
 	}
 
 	c.JSON(200, true)
 }
 
-// GET /orders
-func OrderList(c *gin.Context) {
-	rows, err := utils.GetDB().Query(c.Request.Context(),
-		"SELECT id, name, price, description FROM orders")
+// GET /Orders
+func OrdersList(c *gin.Context) {
 
-	if err != nil {
-		c.JSON(500, models.OrdersErrorResponse{err.Error(), "500"})
-		return
-	}
-	defer rows.Close()
-
+	var filter repositories.OrdersFilter
 	var list []models.Orders
 
-	for rows.Next() {
-		var e models.Orders
+	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
+	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
 
-		if err := rows.Scan(&e.ID, &e.Name, &e.Price, &e.Description); err != nil {
-			c.JSON(500, models.OrdersErrorResponse{err.Error(), "500"})
-			return
-		}
+	list, err := repositories.OrdersList(c.Request.Context(), filter)
 
-		list = append(list, e)
+	if err != nil {
+		c.JSON(400, false)
+		return
 	}
 
 	c.JSON(200, gin.H{
@@ -60,61 +49,55 @@ func OrderList(c *gin.Context) {
 	})
 }
 
-// DELETE /orders/:id
-func OrderDelete(c *gin.Context) {
-	idStr := c.Param("id")
-
-	id, err := strconv.Atoi(idStr)
+// DELETE /Orders/:id
+func OrdersDelete(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
-	res, err := utils.GetDB().Exec(c.Request.Context(),
-		"DELETE FROM orders WHERE id=$1", id)
-
-	if err != nil || res.RowsAffected() == 0 {
-		c.JSON(500, false)
+	err = repositories.OrdersDelete(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
-// PUT /orders/:id
-func OrderUpdate(c *gin.Context) {
+// PUT /Orders/:id
+func OrdersUpdate(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
 	var req models.Orders
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, models.OrdersErrorResponse{err.Error(), "400"})
+		c.JSON(400, err.Error())
 		return
 	}
 
-	_, err = utils.GetDB().Exec(c.Request.Context(),
-		"UPDATE orders SET id=$1, name=$2, price=$3, description=$4, WHERE id=$5",
-		req.ID, req.Name, req.Price, req.Description, id,
-	)
-
+	err = repositories.OrdersUpdate(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(500, models.OrdersErrorResponse{err.Error(), "500"})
+		c.JSON(500, err.Error())
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
 // ENDPOINT
-func OrderRoutes(r *gin.Engine) {
-	r.POST("/orders", OrderCreate)
-	r.GET("/orders", OrderList)
-	r.DELETE("/orders/:id", OrderDelete)
-	r.PUT("/orders/:id", OrderUpdate)
+func OrdersRoutes(r *gin.Engine) {
+	r.POST("/orders", OrdersCreate)
+	r.GET("/orders", OrdersList)
+	r.DELETE("/orders/:id", OrdersDelete)
+	r.PUT("/orders/:id", OrdersUpdate)
 }

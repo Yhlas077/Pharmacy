@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
+	"github.com/yhlas/basic-pharmacy/internal/repositories"
 
 	"github.com/gin-gonic/gin"
 )
 
-// POST /categories
+// POST /Category  // controllers
 func CategoryCreate(c *gin.Context) {
+
 	var req models.Categories
 
 	if err := c.BindJSON(&req); err != nil {
@@ -18,41 +19,29 @@ func CategoryCreate(c *gin.Context) {
 		return
 	}
 
-	_, err := utils.GetDB().Exec(c.Request.Context(),
-		"INSERT INTO categories(id, name) VALUES ($1,$2)",
-		req.ID, req.Name,
-	)
+	_, err := repositories.CategoryCreate(c.Request.Context(), req)
 
 	if err != nil {
-		c.JSON(500, models.CategoriesErrorResponse{err.Error(), "500"})
-		return
+		c.JSON(500, models.CategoriesErrorResponse{err.Error(), "400"})
 	}
 
 	c.JSON(200, true)
 }
 
-// GET /categories
+// GET /Category
 func CategoryList(c *gin.Context) {
-	rows, err := utils.GetDB().Query(c.Request.Context(),
-		"SELECT id, name from categories")
 
-	if err != nil {
-		c.JSON(500, models.CategoriesErrorResponse{err.Error(), "500"})
-		return
-	}
-	defer rows.Close()
-
+	var filter repositories.CategoryFilter
 	var list []models.Categories
 
-	for rows.Next() {
-		var e models.Categories
+	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
+	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
 
-		if err := rows.Scan(&e.ID, &e.Name); err != nil {
-			c.JSON(500, models.CategoriesErrorResponse{err.Error(), "500"})
-			return
-		}
+	list, err := repositories.CategoryList(c.Request.Context(), filter)
 
-		list = append(list, e)
+	if err != nil {
+		c.JSON(400, false)
+		return
 	}
 
 	c.JSON(200, gin.H{
@@ -60,61 +49,55 @@ func CategoryList(c *gin.Context) {
 	})
 }
 
-// DELETE /users/:id
+// DELETE /Category/:id
 func CategoryDelete(c *gin.Context) {
-	idStr := c.Param("id")
-
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
-	res, err := utils.GetDB().Exec(c.Request.Context(),
-		"DELETE FROM categories WHERE id=$1", id)
-
-	if err != nil || res.RowsAffected() == 0 {
-		c.JSON(500, false)
+	err = repositories.CategoryDelete(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
-// PUT /users/:id
+// PUT /Category/:id
 func CategoryUpdate(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
 	var req models.Categories
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, models.CategoriesErrorResponse{err.Error(), "400"})
+		c.JSON(400, err.Error())
 		return
 	}
 
-	_, err = utils.GetDB().Exec(c.Request.Context(),
-		"UPDATE categories SET id=$1, name=$2 WHERE id=$3",
-		req.ID, req.Name, id,
-	)
-
+	err = repositories.CategoryUpdate(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(500, models.CategoriesErrorResponse{err.Error(), "500"})
+		c.JSON(500, err.Error())
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
 // ENDPOINT
 func CategoryRoutes(r *gin.Engine) {
-	r.POST("/categories", CategoryCreate)
-	r.GET("/categories", CategoryList)
-	r.DELETE("/categories/:id", CategoryDelete)
-	r.PUT("/categories/:id", CategoryUpdate)
+	r.POST("/category", CategoryCreate)
+	r.GET("/category", CategoryList)
+	r.DELETE("/category/:id", CategoryDelete)
+	r.PUT("/category/:id", CategoryUpdate)
 }

@@ -19,13 +19,11 @@ func main() {
 	// HTTP serve
 	r := gin.Default()
 
-	controllers.RegisterRoutes(r)
-	controllers.Pharmacy_medicines_Routes(r)
+	controllers.UserRoutes(r)
+	controllers.PharmacyMedicineRoutes(r)
 	controllers.PharmacyRoutes(r)
-	controllers.OrderRoutes(r)
+	controllers.OrdersRoutes(r)
 	controllers.CategoryRoutes(r)
-
-	r.Run(":8080")
 
 	err := r.Run(":8080")
 	if err != nil {

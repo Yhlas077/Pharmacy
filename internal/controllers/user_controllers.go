@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
+	"github.com/yhlas/basic-pharmacy/internal/repositories"
 
 	"github.com/gin-gonic/gin"
 )
 
-// POST /users
+// POST /users  // controllers
 func UserCreate(c *gin.Context) {
+
 	var req models.User
 
 	if err := c.BindJSON(&req); err != nil {
@@ -18,14 +19,10 @@ func UserCreate(c *gin.Context) {
 		return
 	}
 
-	_, err := utils.GetDB().Exec(c.Request.Context(),
-		"INSERT INTO users(id, name, email, password, role) VALUES ($1,$2,$3,$4,$5)",
-		req.ID, req.Name, req.Email, req.Password, req.Role,
-	)
+	_, err := repositories.UserCreate(c.Request.Context(), req)
 
 	if err != nil {
-		c.JSON(500, models.UserErrorResponse{err.Error(), "500"})
-		return
+		c.JSON(500, models.UserErrorResponse{err.Error(), "400"})
 	}
 
 	c.JSON(200, true)
@@ -33,26 +30,20 @@ func UserCreate(c *gin.Context) {
 
 // GET /users
 func UserList(c *gin.Context) {
-	rows, err := utils.GetDB().Query(c.Request.Context(),
-		"SELECT id, name, email, password, role FROM users")
 
-	if err != nil {
-		c.JSON(500, models.UserErrorResponse{err.Error(), "500"})
-		return
-	}
-	defer rows.Close()
-
+	var filter repositories.UserFilter
 	var list []models.User
 
-	for rows.Next() {
-		var e models.User
+	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
+	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
+	filter.Search = c.Query("search")
+	filter.Role = c.Query("role")
 
-		if err := rows.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Role); err != nil {
-			c.JSON(500, models.UserErrorResponse{err.Error(), "500"})
-			return
-		}
+	list, err := repositories.UserList(c.Request.Context(), filter)
 
-		list = append(list, e)
+	if err != nil {
+		c.JSON(400, false)
+		return
 	}
 
 	c.JSON(200, gin.H{
@@ -62,23 +53,21 @@ func UserList(c *gin.Context) {
 
 // DELETE /users/:id
 func UserDelete(c *gin.Context) {
-	idStr := c.Param("id")
-
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
-	res, err := utils.GetDB().Exec(c.Request.Context(),
-		"DELETE FROM users WHERE id=$1", id)
-
-	if err != nil || res.RowsAffected() == 0 {
-		c.JSON(500, false)
+	err = repositories.UserDelete(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
 // PUT /users/:id
@@ -87,32 +76,28 @@ func UserUpdate(c *gin.Context) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(400, false)
+		c.JSON(400, err.Error())
 		return
 	}
 
 	var req models.User
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, models.UserErrorResponse{err.Error(), "400"})
+		c.JSON(400, err.Error())
 		return
 	}
 
-	_, err = utils.GetDB().Exec(c.Request.Context(),
-		"UPDATE users SET id=$1, name=$2, email=$3, password=$4, role=$5 WHERE id=$6",
-		req.ID, req.Name, req.Email, req.Password, req.Role, id,
-	)
-
+	err = repositories.UserUpdate(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(500, models.UserErrorResponse{err.Error(), "500"})
+		c.JSON(500, err.Error())
 		return
 	}
 
-	c.JSON(200, true)
+	c.JSON(200, "ok")
 }
 
 // ENDPOINT
-func RegisterRoutes(r *gin.Engine) {
+func UserRoutes(r *gin.Engine) {
 	r.POST("/users", UserCreate)
 	r.GET("/users", UserList)
 	r.DELETE("/users/:id", UserDelete)

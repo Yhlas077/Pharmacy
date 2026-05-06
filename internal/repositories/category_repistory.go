@@ -12,7 +12,9 @@ type CategoryFilter struct {
 	Offset int
 }
 
-func CategoryList(c context.Context, f CategoryFilter, moreArg ...int) ([]models.Categories, error) {
+// GET
+func CategoryList(c context.Context, f CategoryFilter) ([]models.Categories, error) {
+
 	db := utils.GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
@@ -31,8 +33,48 @@ func CategoryList(c context.Context, f CategoryFilter, moreArg ...int) ([]models
 
 	for rows.Next() {
 		item := models.Categories{}
-		rows.Scan(&item.ID, &item.Name)
+		err := rows.Scan(&item.ID, &item.Name)
+		if err != nil {
+			return nil, err
+		}
 		list = append(list, item)
 	}
 	return list, nil
+}
+
+// POST /Category // repository
+func CategoryCreate(c context.Context, Category models.Categories) (models.Categories, error) {
+
+	_, err := utils.GetDB().Exec(context.Background(),
+		"INSERT INTO categories(id, name) VALUES ($1,$2)",
+		Category.ID, Category.Name,
+	)
+	if err != nil {
+		return models.Categories{}, err
+	}
+	return Category, nil
+}
+
+func CategoryDelete(c context.Context, id int) error {
+	db := utils.GetDB()
+
+	_, err := db.Exec(c,
+		`DELETE FROM categories WHERE id=$1`,
+		id,
+	)
+
+	return err
+}
+
+func CategoryUpdate(c context.Context, id int, req models.Categories) error {
+	db := utils.GetDB()
+
+	_, err := db.Exec(c,
+		`UPDATE categories 
+		 SET name=$1
+		 WHERE id=$2`,
+		req.Name, id,
+	)
+
+	return err
 }
