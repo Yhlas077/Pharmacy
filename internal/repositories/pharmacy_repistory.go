@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
@@ -10,6 +11,11 @@ import (
 type PharmacyFilter struct {
 	Limit  int
 	Offset int
+	Search string
+}
+
+func LengthStr(l []any) string {
+	return strconv.Itoa(len(l))
 }
 
 // GET
@@ -18,6 +24,12 @@ func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, err
 	db := utils.GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
+
+	if f.Search != "" {
+		sqlArgs = append(sqlArgs, f.Search)
+		sqlWhere += ` and (first_name ilike '%$` + LengthStr(sqlArgs) + `%')`
+
+	}
 
 	rows, err := db.Query(c, `select id, name, address, pharmacy_hours
 		from pharmacies

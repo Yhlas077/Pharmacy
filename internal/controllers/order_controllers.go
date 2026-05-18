@@ -5,6 +5,7 @@ import (
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,17 +16,16 @@ func OrdersCreate(c *gin.Context) {
 	var req models.Orders
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, models.OrdersErrorResponse{err.Error(), "400"})
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	_, err := repositories.OrdersCreate(c.Request.Context(), req)
 
 	if err != nil {
-		c.JSON(500, models.OrdersErrorResponse{err.Error(), "400"})
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 	}
-
-	c.JSON(200, true)
+	utils.SuccessResponse(c, nil)
 }
 
 // GET /Orders
@@ -40,32 +40,28 @@ func OrdersList(c *gin.Context) {
 	list, err := repositories.OrdersList(c.Request.Context(), filter)
 
 	if err != nil {
-		c.JSON(400, false)
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"list": list,
-	})
+	utils.SuccessResponse(c, list)
+
 }
 
 // DELETE /Orders/:id
 func OrdersDelete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	err = repositories.OrdersDelete(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
-
-	c.JSON(200, "ok")
+	utils.SuccessResponse(c, nil)
 }
 
 // PUT /Orders/:id
@@ -74,24 +70,23 @@ func OrdersUpdate(c *gin.Context) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(400, err.Error())
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	var req models.Orders
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, err.Error())
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	err = repositories.OrdersUpdate(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(500, err.Error())
+		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
-
-	c.JSON(200, "ok")
+	utils.SuccessResponse(c, nil)
 }
 
 // ENDPOINT

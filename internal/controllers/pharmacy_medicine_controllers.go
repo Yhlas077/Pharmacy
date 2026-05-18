@@ -5,6 +5,7 @@ import (
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,17 +16,17 @@ func PharmacyMedicineCreate(c *gin.Context) {
 	var req models.PharmacyMedicines
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, models.PharmacyMedicineErrorResponse{err.Error(), "400"})
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	_, err := repositories.PharmacyMedicineCreate(c.Request.Context(), req)
 
 	if err != nil {
-		c.JSON(500, models.PharmacyMedicineErrorResponse{err.Error(), "400"})
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 	}
 
-	c.JSON(200, true)
+	utils.SuccessResponse(c, nil)
 }
 
 // GET /users
@@ -40,32 +41,29 @@ func PharmacyMedicineList(c *gin.Context) {
 	list, err := repositories.PharmacyMedicineList(c.Request.Context(), filter)
 
 	if err != nil {
-		c.JSON(400, false)
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"list": list,
-	})
+	utils.SuccessResponse(c, list)
+
 }
 
 // DELETE /users/:id
 func PharmacyMedicineDelete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	err = repositories.PharmacyMedicineDelete(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
 
-	c.JSON(200, "ok")
+	utils.SuccessResponse(c, nil)
 }
 
 // PUT /users/:id
@@ -74,24 +72,24 @@ func PharmacyMedicineUpdate(c *gin.Context) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(400, err.Error())
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	var req models.PharmacyMedicines
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, err.Error())
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
 	err = repositories.PharmacyMedicineUpdate(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(500, err.Error())
+		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
 
-	c.JSON(200, "ok")
+	utils.SuccessResponse(c, nil)
 }
 
 // ENDPOINT

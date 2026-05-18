@@ -6,8 +6,3 @@ type Orders struct {
 	Price       float64 `json:"price"`
 	Description string  `json:"description"`
 }
-
-type OrdersErrorResponse struct {
-	Message string `json:"message"`
-	Code    string `json:"code"`
-}

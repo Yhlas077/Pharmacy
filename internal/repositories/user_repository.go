@@ -58,6 +58,23 @@ func UserList(c context.Context, f UserFilter) ([]models.User, error) {
 	return list, nil
 }
 
+func UserGetByEmail(c context.Context, email string) (models.User, error) {
+
+	db := utils.GetDB()
+
+	row := db.QueryRow(c, `select id, name, email, password, role
+		from users
+			where email=$1`, email)
+
+	item := models.User{}
+
+	err := row.Scan(&item.ID, &item.Name, &item.Email, &item.Password, &item.Role)
+	if err != nil {
+		return models.User{}, err
+	}
+	return item, nil
+}
+
 // POST /users // repository
 func UserCreate(c context.Context, user models.User) (models.User, error) {
 

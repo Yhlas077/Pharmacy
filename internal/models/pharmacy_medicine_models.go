@@ -8,8 +8,3 @@ type PharmacyMedicines struct {
 	New_price   float64 `json:"new_price"`
 	Category_id int     `json:"category_id"`
 }
-
-type PharmacyMedicineErrorResponse struct {
-	Message string `json:"message"`
-	Code    string `json:"code"`
-}
