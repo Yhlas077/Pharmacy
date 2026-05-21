@@ -30,6 +30,19 @@ func Login(c *gin.Context) {
 		}
 		token := GenerateToken(email)
 		TokenMap[token] = info.ID
+
+		
+
+		_, err := utils.GetDB().Exec(c,
+			`UPDATE users
+			SET token=$1 WHERE email=$2`,
+			token, info.Email,
+		)
+
+		if err != nil {
+			utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
+		}
+
 		c.JSON(200, gin.H{
 			"token": token,
 		})
@@ -38,6 +51,6 @@ func Login(c *gin.Context) {
 	}
 }
 
-func LoginRoute(r *gin.Engine) {
-	r.POST("/login", Login)
+func LoginRoute(rg *gin.RouterGroup) {
+	rg.POST("/login", Login)
 }

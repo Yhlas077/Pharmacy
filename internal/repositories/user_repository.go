@@ -23,6 +23,9 @@ func LenStr(l []any) string {
 func UserList(c context.Context, f UserFilter) ([]models.User, error) {
 
 	db := utils.GetDB()
+	if f.Limit == 0 {
+		f.Limit = 10
+	}
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 	if f.Search != "" {

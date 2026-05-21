@@ -90,9 +90,9 @@ func OrdersUpdate(c *gin.Context) {
 }
 
 // ENDPOINT
-func OrdersRoutes(r *gin.Engine) {
-	r.POST("/orders", OrdersCreate)
-	r.GET("/orders", OrdersList)
-	r.DELETE("/orders/:id", OrdersDelete)
-	r.PUT("/orders/:id", OrdersUpdate)
+func OrdersRoutes(rg *gin.RouterGroup) {
+	rg.POST("/orders", OrdersCreate)
+	rg.GET("/orders", OrdersList)
+	rg.DELETE("/orders/:id", OrdersDelete)
+	rg.PUT("/orders/:id", OrdersUpdate)
 }

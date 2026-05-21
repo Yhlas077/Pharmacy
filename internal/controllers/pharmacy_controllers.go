@@ -91,9 +91,9 @@ func PharmacyUpdate(c *gin.Context) {
 }
 
 // ENDPOINT
-func PharmacyRoutes(r *gin.Engine) {
-	r.POST("/pharmacies", PharmacyCreate)
-	r.GET("/pharmacies", PharmacyList)
-	r.DELETE("/pharmacies/:id", PharmacyDelete)
-	r.PUT("/pharmacies/:id", PharmacyUpdate)
+func PharmacyRoutes(rg *gin.RouterGroup) {
+	rg.POST("/pharmacies", PharmacyCreate)
+	rg.GET("/pharmacies", PharmacyList)
+	rg.DELETE("/pharmacies/:id", PharmacyDelete)
+	rg.PUT("/pharmacies/:id", PharmacyUpdate)
 }

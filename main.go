@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 
@@ -19,9 +20,7 @@ func Logger() gin.HandlerFunc {
 
 		if c.Request.URL.Path != "/login" {
 			if userID == 0 {
-				c.JSON(400, gin.H{
-					"error": "token missing",
-				})
+				utils.ErrorResponse(c, errors.New("token is missing"), 400, utils.ErrorCodeRequired)
 				c.Abort()
 				return
 			}
@@ -34,6 +33,7 @@ func Logger() gin.HandlerFunc {
 func main() {
 
 	utils.ConnectDB("postgres://yhlas1:123456@localhost:5432/postgres")
+
 	defer utils.GetDB().Close(context.Background())
 
 	// HTTP serve
@@ -41,12 +41,14 @@ func main() {
 
 	r.Use(Logger())
 
-	controllers.UserRoutes(r)
-	controllers.PharmacyMedicineRoutes(r)
-	controllers.PharmacyRoutes(r)
-	controllers.OrdersRoutes(r)
-	controllers.CategoryRoutes(r)
-	controllers.LoginRoute(r)
+	rg := r.Group("/api/admin")
+
+	controllers.UserRoutes(rg)
+	controllers.PharmacyMedicineRoutes(rg)
+	controllers.PharmacyRoutes(rg)
+	controllers.OrdersRoutes(rg)
+	controllers.CategoryRoutes(rg)
+	controllers.LoginRoute(rg)
 
 	err := r.Run(":8080")
 	if err != nil {

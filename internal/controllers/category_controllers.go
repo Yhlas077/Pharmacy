@@ -101,9 +101,9 @@ func CategoryUpdate(c *gin.Context) {
 }
 
 // ENDPOINT
-func CategoryRoutes(r *gin.Engine) {
-	r.POST("/category", CategoryCreate)
-	r.GET("/category", CategoryList)
-	r.DELETE("/category/:id", CategoryDelete)
-	r.PUT("/category/:id", CategoryUpdate)
+func CategoryRoutes(rg *gin.RouterGroup) {
+	rg.POST("/category", CategoryCreate)
+	rg.GET("/category", CategoryList)
+	rg.DELETE("/category/:id", CategoryDelete)
+	rg.PUT("/category/:id", CategoryUpdate)
 }

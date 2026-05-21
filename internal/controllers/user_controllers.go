@@ -50,27 +50,6 @@ func UserList(c *gin.Context) {
 	utils.SuccessResponse(c, list)
 }
 
-// GET /users
-func UserAdminList(c *gin.Context) {
-
-	var filter repositories.UserFilter
-	var list []models.User
-
-	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
-	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
-	filter.Search = c.Query("search")
-	filter.Role = "admin"
-
-	list, err := repositories.UserList(c.Request.Context(), filter)
-
-	if err != nil {
-		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
-		return
-	}
-
-	utils.SuccessResponse(c, list)
-}
-
 // DELETE /users/:id
 func UserDelete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -114,9 +93,9 @@ func UserUpdate(c *gin.Context) {
 }
 
 // ENDPOINT
-func UserRoutes(r *gin.Engine) {
-	r.POST("/users", UserCreate)
-	r.GET("/users", UserList)
-	r.DELETE("/users/:id", UserDelete)
-	r.PUT("/users/:id", UserUpdate)
+func UserRoutes(rg *gin.RouterGroup) {
+	rg.POST("/users", UserCreate)
+	rg.GET("/users", UserList)
+	rg.DELETE("/users/:id", UserDelete)
+	rg.PUT("/users/:id", UserUpdate)
 }

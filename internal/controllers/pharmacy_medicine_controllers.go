@@ -93,9 +93,9 @@ func PharmacyMedicineUpdate(c *gin.Context) {
 }
 
 // ENDPOINT
-func PharmacyMedicineRoutes(r *gin.Engine) {
-	r.POST("/pharmacy_medicine", PharmacyMedicineCreate)
-	r.GET("/pharmacy_medicine", PharmacyMedicineList)
-	r.DELETE("/pharmacy_medicine/:id", PharmacyMedicineDelete)
-	r.PUT("/pharmacy_medicine/:id", PharmacyMedicineUpdate)
+func PharmacyMedicineRoutes(rg *gin.RouterGroup) {
+	rg.POST("/pharmacy_medicine", PharmacyMedicineCreate)
+	rg.GET("/pharmacy_medicine", PharmacyMedicineList)
+	rg.DELETE("/pharmacy_medicine/:id", PharmacyMedicineDelete)
+	rg.PUT("/pharmacy_medicine/:id", PharmacyMedicineUpdate)
 }
