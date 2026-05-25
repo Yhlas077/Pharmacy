@@ -17,7 +17,7 @@ func Logger() gin.HandlerFunc {
 		token := c.Query("token")
 
 		userID := controllers.TokenMap[token]
-		if c.Request.URL.Path != "/api/admin/login" {
+		if c.Request.URL.Path != "/api/login" && c.Request.URL.Path != "/api/registration" && c.Request.URL.Path != "/api/logout" {
 			if userID == 0 {
 				utils.ErrorResponse(c, errors.New("token is missing"), 400, utils.ErrorCodeRequired)
 				c.Abort()
@@ -31,7 +31,7 @@ func Logger() gin.HandlerFunc {
 // MAIN
 func main() {
 
-	utils.ConnectDB("postgres://yhlas1:123456@localhost:5432/postgres")
+	utils.ConnectDB("postgres://postgres:123456@localhost:5432/pharmacy_db")
 
 	defer utils.GetDB().Close(context.Background())
 
@@ -39,7 +39,7 @@ func main() {
 
 	r.Use(Logger())
 
-	rg := r.Group("/api/admin")
+	rg := r.Group("/api")
 
 	controllers.UserRoutes(rg)
 	controllers.PharmacyMedicineRoutes(rg)

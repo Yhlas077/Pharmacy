@@ -34,9 +34,10 @@ func Login(c *gin.Context) {
 	email := c.Query("email")
 	password := c.Query("password")
 
-	fmt.Println("Hello baby")
+	fmt.Println(email, password)
 
 	Info, err := repositories.UserGetByEmail(c, email)
+
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 500, "")
@@ -44,6 +45,7 @@ func Login(c *gin.Context) {
 
 	if Info.Password == password {
 		Info, _ := repositories.UserGetByEmail(context.Background(), email)
+
 		if TokenMap == nil {
 			TokenMap = map[string]int{}
 		}
