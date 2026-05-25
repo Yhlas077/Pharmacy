@@ -17,8 +17,7 @@ func Logger() gin.HandlerFunc {
 		token := c.Query("token")
 
 		userID := controllers.TokenMap[token]
-
-		if c.Request.URL.Path != "/login" {
+		if c.Request.URL.Path != "/api/admin/login" {
 			if userID == 0 {
 				utils.ErrorResponse(c, errors.New("token is missing"), 400, utils.ErrorCodeRequired)
 				c.Abort()
@@ -36,7 +35,6 @@ func main() {
 
 	defer utils.GetDB().Close(context.Background())
 
-	// HTTP serve
 	r := gin.Default()
 
 	r.Use(Logger())

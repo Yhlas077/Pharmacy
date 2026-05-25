@@ -53,8 +53,7 @@ func CategoryList(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, list)
-	}
-
+}
 
 // DELETE /Category/:id
 func CategoryDelete(c *gin.Context) {
