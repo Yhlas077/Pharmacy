@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -34,13 +33,11 @@ func Login(c *gin.Context) {
 	email := c.Query("email")
 	password := c.Query("password")
 
-	fmt.Println(email, password)
-
 	Info, err := repositories.UserGetByEmail(c, email)
-
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 500, "")
+		return
 	}
 
 	if Info.Password == password {
@@ -54,10 +51,10 @@ func Login(c *gin.Context) {
 
 		repositories.InsertToken(c, Info.ID, token)
 
-		repositories.GetToken(c, token)
-
+		repositories.ShowToken(c, token)
 	} else {
 		utils.ErrorResponse(c, err, 500, "")
+		return
 	}
 }
 
