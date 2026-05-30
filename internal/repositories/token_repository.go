@@ -25,3 +25,25 @@ func GetToken(c *gin.Context, token string, id int) {
 	row := utils.GetDB().QueryRow(context.Background(), `select token from tokens where id =$1`, id)
 	row.Scan(&token)
 }
+
+func DeleteToken(c *gin.Context, token string) {
+	var id int
+	row := utils.GetDB().QueryRow(context.Background(), `select user_id from tokens where token = $1`, token)
+	row.Scan(&id)
+	_, err := utils.GetDB().Exec(c, `DELETE FROM tokens WHERE user_id=$1`, id)
+	if err != nil {
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeInvalid)
+		return
+	}
+}
+
+func InsertUser(c *gin.Context, name string, email string, password string) {
+	_, err := utils.GetDB().Exec(context.Background(),
+		"INSERT INTO users(name, email, password, role) VALUES ($1,$2,$3,$4)",
+		name, email, password, "müşderi",
+	)
+	if err != nil {
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
+		return
+	}
+}

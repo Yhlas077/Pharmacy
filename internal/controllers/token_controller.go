@@ -58,6 +58,24 @@ func Login(c *gin.Context) {
 	}
 }
 
+func Registration(c *gin.Context) {
+	name := c.Query("name")
+	email := c.Query("email")
+	password := c.Query("password")
+
+	repositories.InsertUser(c, name, email, password)
+	utils.SuccessResponse(c, nil)
+}
+
+func Logout(c *gin.Context) {
+	token := c.Query("token")
+
+	repositories.DeleteToken(c, token)
+	utils.SuccessResponse(c, nil)
+}
+
 func LoginRoute(rg *gin.RouterGroup) {
 	rg.POST("/login", Login)
+	rg.POST("/registration", Registration)
+	rg.DELETE("/logout", Logout)
 }
