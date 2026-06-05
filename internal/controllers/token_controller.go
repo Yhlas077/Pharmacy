@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -41,7 +42,6 @@ func Login(c *gin.Context) {
 	}
 
 	if Info.Password == password {
-		Info, _ := repositories.UserGetByEmail(context.Background(), email)
 
 		if TokenMap == nil {
 			TokenMap = map[string]int{}
@@ -59,16 +59,32 @@ func Login(c *gin.Context) {
 }
 
 func Registration(c *gin.Context) {
+
 	name := c.Query("name")
 	email := c.Query("email")
 	password := c.Query("password")
+
+	validate := validator.New()
+
+	newUser := models.User{
+		Name:     name,
+		Email:    email,
+		Password: password,
+	}
+
+	err := validate.Struct(newUser)
+
+	if err != nil {
+		utils.ErrorResponse(c, err, 500, "")
+		return
+	}
 
 	repositories.InsertUser(c, name, email, password)
 	utils.SuccessResponse(c, nil)
 }
 
 func Logout(c *gin.Context) {
-	token := c.Query("token")
+	token := c.Request.Header.Get("Authorization")
 
 	repositories.DeleteToken(c, token)
 	utils.SuccessResponse(c, nil)
