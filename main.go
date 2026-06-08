@@ -11,7 +11,7 @@ import (
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
-func Logger() gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		token := c.Query("token")
@@ -37,7 +37,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(Logger())
+	r.Use(AuthMiddleware())
 
 	rg := r.Group("/api")
 

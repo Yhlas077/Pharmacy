@@ -40,7 +40,7 @@ func DeleteToken(c *gin.Context, token string) {
 func InsertUser(c *gin.Context, name string, email string, password string) {
 	_, err := utils.GetDB().Exec(context.Background(),
 		"INSERT INTO users(name, email, password, role) VALUES ($1,$2,$3,$4)",
-		name, email, password, "müşderi",
+		name, email, password, "user",
 	)
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)

@@ -18,7 +18,6 @@ func GenerateToken(email string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	hasher := md5.New()
 	hasher.Write(hash)
 
@@ -70,6 +69,7 @@ func Registration(c *gin.Context) {
 		Name:     name,
 		Email:    email,
 		Password: password,
+		Role:     "user",
 	}
 
 	err := validate.Struct(newUser)
