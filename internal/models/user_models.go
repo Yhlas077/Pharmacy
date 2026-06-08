@@ -1,5 +1,11 @@
 package models
 
+type Role string
+
+const AdminRole Role = "admin"
+const PharmacyRole Role = "pharmacy"
+const UserRole Role = "user"
+
 type ErrorResponse struct {
 	Success   bool   `json:"success"`
 	ErrorMsg  string `json:"error_msg" `

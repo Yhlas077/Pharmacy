@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
 type CategoryFilter struct {
@@ -15,7 +14,7 @@ type CategoryFilter struct {
 // GET
 func CategoryList(c context.Context, f CategoryFilter) ([]models.Categories, error) {
 
-	db := utils.GetDB()
+	db := GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
@@ -45,7 +44,7 @@ func CategoryList(c context.Context, f CategoryFilter) ([]models.Categories, err
 // POST /Category // repository
 func CategoryCreate(c context.Context, Category models.Categories) (models.Categories, error) {
 
-	_, err := utils.GetDB().Exec(context.Background(),
+	_, err := GetDB().Exec(context.Background(),
 		"INSERT INTO categories(id, name) VALUES ($1,$2)",
 		Category.ID, Category.Name,
 	)
@@ -56,18 +55,19 @@ func CategoryCreate(c context.Context, Category models.Categories) (models.Categ
 }
 
 func CategoryDelete(c context.Context, id int) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`DELETE FROM categories WHERE id=$1`,
 		id,
 	)
+	// TODO: error berdirmeli eger pozmadyk bolsa (hokman pozmaly , hokman id gabat gelmeli)
 
 	return err
 }
 
 func CategoryUpdate(c context.Context, id int, req models.Categories) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`UPDATE categories 
@@ -75,6 +75,7 @@ func CategoryUpdate(c context.Context, id int, req models.Categories) error {
 		 WHERE id=$2`,
 		req.Name, id,
 	)
+	// TODO: error berdirmeli eger pozmadyk bolsa (hokman pozmaly , hokman id gabat gelmeli)
 
 	return err
 }

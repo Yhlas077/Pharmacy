@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
 type UserFilter struct {
@@ -22,7 +21,7 @@ func LenStr(l []any) string {
 // GET
 func UserList(c context.Context, f UserFilter) ([]models.User, error) {
 
-	db := utils.GetDB()
+	db := GetDB()
 	if f.Limit == 0 {
 		f.Limit = 10
 	}
@@ -63,7 +62,7 @@ func UserList(c context.Context, f UserFilter) ([]models.User, error) {
 
 func UserGetByEmail(c context.Context, email string) (models.User, error) {
 
-	db := utils.GetDB()
+	db := GetDB()
 
 	row := db.QueryRow(c, `select id, name, email, password, role
 		from users
@@ -78,10 +77,27 @@ func UserGetByEmail(c context.Context, email string) (models.User, error) {
 	return item, nil
 }
 
+func UserGetByID(c context.Context, id int) (models.User, error) {
+
+	db := GetDB()
+
+	row := db.QueryRow(c, `select id, name, email, password, role
+		from users
+			where id=$1`, id)
+
+	item := models.User{}
+
+	err := row.Scan(&item.ID, &item.Name, &item.Email, &item.Password, &item.Role)
+	if err != nil {
+		return models.User{}, err
+	}
+	return item, nil
+}
+
 // POST /users // repository
 func UserCreate(c context.Context, user models.User) (models.User, error) {
 
-	_, err := utils.GetDB().Exec(context.Background(),
+	_, err := GetDB().Exec(context.Background(),
 		"INSERT INTO users(id, name, email, password, role) VALUES ($1,$2,$3,$4,$5)",
 		user.ID, user.Name, user.Email, user.Password, user.Role,
 	)
@@ -92,7 +108,7 @@ func UserCreate(c context.Context, user models.User) (models.User, error) {
 }
 
 func UserDelete(c context.Context, id int) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`DELETE FROM users WHERE id=$1`,
@@ -103,7 +119,7 @@ func UserDelete(c context.Context, id int) error {
 }
 
 func UserUpdate(c context.Context, id int, req models.User) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`UPDATE users 

@@ -4,21 +4,23 @@ import (
 	"context"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
 type OrdersFilter struct {
-	Limit  int
-	Offset int
+	Limit      int
+	Offset     int
+	UserId     int
+	PharmacyID int
 }
 
 // GET
 func OrdersList(c context.Context, f OrdersFilter) ([]models.Orders, error) {
 
-	db := utils.GetDB()
+	db := GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
+	// TODO: implement FILTERS BY LOGIC (DB)
 	rows, err := db.Query(c, `select id, name, price, description
 		from orders
 			where 1=1 `+sqlWhere+`
@@ -45,7 +47,7 @@ func OrdersList(c context.Context, f OrdersFilter) ([]models.Orders, error) {
 // POST /orders // repository
 func OrdersCreate(c context.Context, Orders models.Orders) (models.Orders, error) {
 
-	_, err := utils.GetDB().Exec(context.Background(),
+	_, err := GetDB().Exec(context.Background(),
 		"INSERT INTO orders(id, name, price, description) VALUES ($1,$2,$3,$4)",
 		Orders.ID, Orders.Name, Orders.Price, Orders.Description,
 	)
@@ -56,7 +58,7 @@ func OrdersCreate(c context.Context, Orders models.Orders) (models.Orders, error
 }
 
 func OrdersDelete(c context.Context, id int) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`DELETE FROM orders WHERE id=$1`,
@@ -67,7 +69,7 @@ func OrdersDelete(c context.Context, id int) error {
 }
 
 func OrdersUpdate(c context.Context, id int, req models.Orders) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`UPDATE orders 

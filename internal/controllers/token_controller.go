@@ -24,8 +24,6 @@ func GenerateToken(email string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-var TokenMap map[string]int
-
 func Login(c *gin.Context) {
 
 	var token string
@@ -42,15 +40,16 @@ func Login(c *gin.Context) {
 
 	if Info.Password == password {
 
-		if TokenMap == nil {
-			TokenMap = map[string]int{}
+		if utils.TokenMap == nil {
+			utils.TokenMap = map[string]int{}
 		}
 		token = GenerateToken(email)
-		TokenMap[token] = Info.ID
+		utils.TokenMap[token] = Info.ID
 
 		repositories.InsertToken(c, Info.ID, token)
-
-		repositories.ShowToken(c, token)
+		c.JSON(200, gin.H{
+			"token": token,
+		})
 	} else {
 		utils.ErrorResponse(c, err, 500, "")
 		return

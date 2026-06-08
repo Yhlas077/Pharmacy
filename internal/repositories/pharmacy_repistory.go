@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
 type PharmacyFilter struct {
@@ -21,7 +20,7 @@ func LengthStr(l []any) string {
 // GET
 func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, error) {
 
-	db := utils.GetDB()
+	db := GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
@@ -45,7 +44,7 @@ func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, err
 
 	for rows.Next() {
 		item := models.Pharmacies{}
-		err := rows.Scan(&item.ID, &item.Name, &item.Address, &item.Pharmacy_hours)
+		err := rows.Scan(&item.ID, &item.Name, &item.Address, &item.PharmacyHours)
 		if err != nil {
 			return nil, err
 		}
@@ -57,9 +56,9 @@ func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, err
 // POST /Pharmacies // repository
 func PharmacyCreate(c context.Context, Pharmacy models.Pharmacies) (models.Pharmacies, error) {
 
-	_, err := utils.GetDB().Exec(context.Background(),
+	_, err := GetDB().Exec(context.Background(),
 		"INSERT INTO pharmacies(id, name, address, pharmacy_hours) VALUES ($1,$2,$3,$4)",
-		Pharmacy.ID, Pharmacy.Name, Pharmacy.Address, Pharmacy.Pharmacy_hours,
+		Pharmacy.ID, Pharmacy.Name, Pharmacy.Address, Pharmacy.PharmacyHours,
 	)
 	if err != nil {
 		return models.Pharmacies{}, err
@@ -68,7 +67,7 @@ func PharmacyCreate(c context.Context, Pharmacy models.Pharmacies) (models.Pharm
 }
 
 func PharmacyDelete(c context.Context, id int) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`DELETE FROM pharmacies WHERE id=$1`,
@@ -79,13 +78,13 @@ func PharmacyDelete(c context.Context, id int) error {
 }
 
 func PharmacyUpdate(c context.Context, id int, req models.Pharmacies) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`UPDATE pharmacies 
 		 SET name=$1, address=$2, pharmacy_hours=$3
 		 WHERE id=$4`,
-		req.Name, req.Address, req.Pharmacy_hours, id,
+		req.Name, req.Address, req.PharmacyHours, id,
 	)
 
 	return err

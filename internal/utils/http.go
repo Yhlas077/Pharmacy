@@ -10,6 +10,7 @@ type ErrorCode string
 const ErrorCodeRequired ErrorCode = "required"
 const ErrorCodeInvalid ErrorCode = "invalid"
 const ErrorCodeMax ErrorCode = "max"
+const ErrorCodeForbidden ErrorCode = "forbidden"
 
 // Error
 func ErrorResponse(c *gin.Context, err error, status int, errorCode ErrorCode) {
@@ -24,6 +25,6 @@ func SuccessResponse(c *gin.Context, data any) {
 	c.JSON(200, gin.H{
 		"success": true,
 		"error":   false,
-		"data": data,
+		"data":    data,
 	})
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
-	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
 type PharmacyMedicineFilter struct {
@@ -15,7 +14,7 @@ type PharmacyMedicineFilter struct {
 // GET
 func PharmacyMedicineList(c context.Context, f PharmacyMedicineFilter) ([]models.PharmacyMedicines, error) {
 
-	db := utils.GetDB()
+	db := GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
@@ -45,7 +44,7 @@ func PharmacyMedicineList(c context.Context, f PharmacyMedicineFilter) ([]models
 // POST /users // repository
 func PharmacyMedicineCreate(c context.Context, pharmacy_medicine models.PharmacyMedicines) (models.PharmacyMedicines, error) {
 
-	_, err := utils.GetDB().Exec(context.Background(),
+	_, err := GetDB().Exec(context.Background(),
 		"INSERT INTO pharmacy_medicines(id, name, description, price, new_price, category_id) VALUES ($1,$2,$3,$4,$5,$6)",
 		pharmacy_medicine.ID, pharmacy_medicine.Name, pharmacy_medicine.Description, pharmacy_medicine.Price, pharmacy_medicine.New_price, pharmacy_medicine.Category_id,
 	)
@@ -56,7 +55,7 @@ func PharmacyMedicineCreate(c context.Context, pharmacy_medicine models.Pharmacy
 }
 
 func PharmacyMedicineDelete(c context.Context, id int) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`DELETE FROM pharmacy_medicines WHERE id=$1`,
@@ -67,7 +66,7 @@ func PharmacyMedicineDelete(c context.Context, id int) error {
 }
 
 func PharmacyMedicineUpdate(c context.Context, id int, req models.PharmacyMedicines) error {
-	db := utils.GetDB()
+	db := GetDB()
 
 	_, err := db.Exec(c,
 		`UPDATE pharmacy_medicines

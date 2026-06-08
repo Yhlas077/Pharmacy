@@ -8,15 +8,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yhlas/basic-pharmacy/internal/controllers"
+	"github.com/yhlas/basic-pharmacy/internal/repositories"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 )
 
+// MOVE: utils/http.go
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		token := c.Query("token")
 
-		userID := controllers.TokenMap[token]
+		userID := utils.TokenMap[token]
+
+		
 		if c.Request.URL.Path != "/api/login" && c.Request.URL.Path != "/api/registration" && c.Request.URL.Path != "/api/logout" {
 			if userID == 0 {
 				utils.ErrorResponse(c, errors.New("token is missing"), 400, utils.ErrorCodeRequired)
@@ -30,10 +34,10 @@ func AuthMiddleware() gin.HandlerFunc {
 
 // MAIN
 func main() {
+	// TODO: implement .env file and configurations (config/app.go)
+	repositories.ConnectDB("postgres://postgres:123456@localhost:5432/pharmacy_db")
 
-	utils.ConnectDB("postgres://postgres:123456@localhost:5432/pharmacy_db")
-
-	defer utils.GetDB().Close(context.Background())
+	defer repositories.GetDB().Close(context.Background())
 
 	r := gin.Default()
 
@@ -53,5 +57,5 @@ func main() {
 		log.Fatalln(err)
 		os.Exit(1)
 	}
-
+	// TODO: implement graceful shutdown
 }
