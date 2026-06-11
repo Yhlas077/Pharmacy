@@ -24,6 +24,7 @@ func PharmacyCreate(c *gin.Context) {
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
+		return
 	}
 	utils.SuccessResponse(c, nil)
 }

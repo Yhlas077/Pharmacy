@@ -61,9 +61,9 @@ func CategoryDelete(c context.Context, id int) error {
 		`DELETE FROM categories WHERE id=$1`,
 		id,
 	)
-	// TODO: error berdirmeli eger pozmadyk bolsa (hokman pozmaly , hokman id gabat gelmeli)
 
 	return err
+
 }
 
 func CategoryUpdate(c context.Context, id int, req models.Categories) error {
@@ -75,7 +75,6 @@ func CategoryUpdate(c context.Context, id int, req models.Categories) error {
 		 WHERE id=$2`,
 		req.Name, id,
 	)
-	// TODO: error berdirmeli eger pozmadyk bolsa (hokman pozmaly , hokman id gabat gelmeli)
 
 	return err
 }
