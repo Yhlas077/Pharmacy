@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -57,10 +58,14 @@ func Login(c *gin.Context) {
 }
 
 func Registration(c *gin.Context) {
+	fmt.Println("REGISTRATION START")
 
 	name := c.Query("name")
 	email := c.Query("email")
 	password := c.Query("password")
+
+	fmt.Println("name =", name)
+	fmt.Println("email =", email)
 
 	validate := validator.New()
 
@@ -74,11 +79,17 @@ func Registration(c *gin.Context) {
 	err := validate.Struct(newUser)
 
 	if err != nil {
+		fmt.Println("VALIDATION ERROR:", err)
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
 
+	fmt.Println("VALIDATION PASSED")
+
 	repositories.InsertUser(c, name, email, password)
+
+	fmt.Println("INSERT FINISHED")
+
 	utils.SuccessResponse(c, nil)
 }
 

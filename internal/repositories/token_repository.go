@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 )
 
 func ShowToken(c context.Context, token string) {
@@ -26,9 +27,16 @@ func DeleteToken(c context.Context, token string) {
 
 }
 
-func InsertUser(c context.Context, name string, email string, password string) {
-	GetDB().Exec(c,
+func InsertUser(c context.Context, name string, email string, password string) error {
+	_, err := GetDB().Exec(c,
 		"INSERT INTO users(name, email, password, role) VALUES ($1,$2,$3,$4)",
 		name, email, password, "user",
 	)
+
+	if err != nil {
+		fmt.Println("DB ERROR:", err)
+		return err
+	}
+
+	return nil
 }

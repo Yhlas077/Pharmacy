@@ -37,7 +37,10 @@ func main() {
 	controllers.PharmacyRoutes(rg)
 	controllers.OrdersRoutes(rg)
 	controllers.CategoryRoutes(rg)
+
 	controllers.LoginRoute(rg)
+
+
 
 	err = r.Run(":8080")
 	if err != nil {

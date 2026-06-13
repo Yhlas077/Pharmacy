@@ -35,10 +35,11 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		token := c.Query("token")
-
 		userID := TokenMap[token]
 
-		if c.Request.URL.Path != "/api/login" && c.Request.URL.Path != "/api/registration" && c.Request.URL.Path != "/api/logout" {
+		if c.Request.URL.Path != "/api/login" &&
+			c.Request.URL.Path != "/api/registration" &&
+			c.Request.URL.Path != "/api/logout" {
 			if userID == 0 {
 				ErrorResponse(c, errors.New("token is missing"), 400, ErrorCodeRequired)
 				c.Abort()
