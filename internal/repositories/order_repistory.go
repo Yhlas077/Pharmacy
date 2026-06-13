@@ -20,7 +20,6 @@ func OrdersList(c context.Context, f OrdersFilter) ([]models.Orders, error) {
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
-	// TODO: implement FILTERS BY LOGIC (DB)
 	rows, err := db.Query(c, `select id, name, price, description
 		from orders
 			where 1=1 `+sqlWhere+`

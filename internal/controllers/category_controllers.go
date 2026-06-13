@@ -18,7 +18,7 @@ import (
 // POST /Category  // controllers
 func CategoryCreate(c *gin.Context) {
 
-	var req models.Categories
+	var req models.Category
 
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -40,7 +40,7 @@ func CategoryCreate(c *gin.Context) {
 func CategoryList(c *gin.Context) {
 
 	var filter repositories.CategoryFilter
-	var list []models.Categories
+	var list []models.Category
 
 	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
 	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
@@ -86,7 +86,7 @@ func CategoryUpdate(c *gin.Context) {
 		return
 	}
 
-	var req models.Categories
+	var req models.Category
 
 	err = c.BindJSON(&req)
 	if err != nil {

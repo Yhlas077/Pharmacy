@@ -12,26 +12,26 @@ type CategoryFilter struct {
 }
 
 // GET
-func CategoryList(c context.Context, f CategoryFilter) ([]models.Categories, error) {
+func CategoryList(c context.Context, f CategoryFilter) ([]models.Category, error) {
 
 	db := GetDB()
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
 	rows, err := db.Query(c, `select id, name
-		from categories
+		from Category
 			where 1=1 `+sqlWhere+`
 		limit $1 offset $2`, sqlArgs...)
 	if err != nil {
 		return nil, err
 	}
 
-	list := []models.Categories{}
+	list := []models.Category{}
 
 	defer rows.Close()
 
 	for rows.Next() {
-		item := models.Categories{}
+		item := models.Category{}
 		err := rows.Scan(&item.ID, &item.Name)
 		if err != nil {
 			return nil, err
@@ -42,14 +42,14 @@ func CategoryList(c context.Context, f CategoryFilter) ([]models.Categories, err
 }
 
 // POST /Category // repository
-func CategoryCreate(c context.Context, Category models.Categories) (models.Categories, error) {
+func CategoryCreate(c context.Context, Category models.Category) (models.Category, error) {
 
 	_, err := GetDB().Exec(context.Background(),
-		"INSERT INTO categories(id, name) VALUES ($1,$2)",
+		"INSERT INTO Category(id, name) VALUES ($1,$2)",
 		Category.ID, Category.Name,
 	)
 	if err != nil {
-		return models.Categories{}, err
+		return models.Category{}, err
 	}
 	return Category, nil
 }
@@ -58,7 +58,7 @@ func CategoryDelete(c context.Context, id int) error {
 	db := GetDB()
 
 	_, err := db.Exec(c,
-		`DELETE FROM categories WHERE id=$1`,
+		`DELETE FROM Category WHERE id=$1`,
 		id,
 	)
 
@@ -66,11 +66,11 @@ func CategoryDelete(c context.Context, id int) error {
 
 }
 
-func CategoryUpdate(c context.Context, id int, req models.Categories) error {
+func CategoryUpdate(c context.Context, id int, req models.Category) error {
 	db := GetDB()
 
 	_, err := db.Exec(c,
-		`UPDATE categories 
+		`UPDATE Category 
 		 SET name=$1
 		 WHERE id=$2`,
 		req.Name, id,

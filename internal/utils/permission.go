@@ -2,6 +2,7 @@ package utils
 
 // import (
 // 	"errors"
+// 	"fmt"
 
 // 	"github.com/gin-gonic/gin"
 // 	"github.com/yhlas/basic-pharmacy/internal/models"
@@ -12,7 +13,6 @@ var TokenMap map[string]int
 
 // func RequireAdmin() gin.HandlerFunc {
 // 	return func(c *gin.Context) {
-		
 // 		token := c.Query("token")
 // 		userID := TokenMap[token]
 // 		if userID == 0 {
@@ -40,6 +40,10 @@ var TokenMap map[string]int
 
 // 		token := c.Query("token")
 // 		userID := TokenMap[token]
+
+// 		fmt.Println("TOKEN =", token)
+// 		fmt.Println("USER ID =", userID)
+
 // 		if userID == 0 {
 // 			ErrorResponse(c, errors.New("token missing"), 403, ErrorCodeForbidden)
 // 			c.Abort()
@@ -51,7 +55,7 @@ var TokenMap map[string]int
 // 			c.Abort()
 // 			return
 // 		}
-// 		if user.Role != string(models.PharmacyRole) || user.Role != string(models.AdminRole) {
+// 		if user.Role != string(models.PharmacyRole) && user.Role != string(models.AdminRole) {
 // 			ErrorResponse(c, errors.New("forbidden"), 403, ErrorCodeForbidden)
 // 			c.Abort()
 // 			return
