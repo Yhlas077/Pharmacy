@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/yhlas/basic-pharmacy/config"
 	"github.com/yhlas/basic-pharmacy/internal/controllers"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
@@ -14,6 +15,8 @@ import (
 
 // MAIN
 func main() {
+
+	config.LoadConfig()
 
 	err := godotenv.Load()
 	if err != nil {
@@ -40,12 +43,10 @@ func main() {
 
 	controllers.LoginRoute(rg)
 
-
-
 	err = r.Run(":8080")
 	if err != nil {
 		log.Fatalln(err)
 		os.Exit(1)
 	}
-	// TODO: implement graceful shutdown
+
 }
