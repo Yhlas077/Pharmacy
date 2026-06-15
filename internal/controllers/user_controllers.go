@@ -94,8 +94,8 @@ func UserUpdate(c *gin.Context) {
 
 // ENDPOINT
 func UserRoutes(rg *gin.RouterGroup) {
-	rg.POST("/users", UserCreate)
+	rg.POST("/users", UserCreate).Use(utils.RequireUser())
 	rg.GET("/users", UserList)
-	rg.DELETE("/users/:id", UserDelete)
-	rg.PUT("/users/:id", UserUpdate)
+	rg.DELETE("/users/:id", UserDelete).Use(utils.RequireUser())
+	rg.PUT("/users/:id", UserUpdate).Use(utils.RequireUser())
 }

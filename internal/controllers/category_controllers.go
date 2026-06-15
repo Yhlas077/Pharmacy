@@ -105,8 +105,8 @@ func CategoryUpdate(c *gin.Context) {
 
 // ENDPOINT
 func CategoryRoutes(rg *gin.RouterGroup) {
-	rg.POST("/admin/category", CategoryCreate)
+	rg.POST("/admin/category", CategoryCreate).Use(utils.RequireAdmin())
 	rg.GET("/admin/category", CategoryList)
-	rg.DELETE("/admin/category/:id", CategoryDelete)
-	rg.PUT("/admin/category/:id", CategoryUpdate)
+	rg.DELETE("/admin/category/:id", CategoryDelete).Use(utils.RequireAdmin())
+	rg.PUT("/admin/category/:id", CategoryUpdate).Use(utils.RequireAdmin())
 }

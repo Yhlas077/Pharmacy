@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -59,6 +61,12 @@ func Login(c *gin.Context) {
 		token = GenerateToken(email)
 		utils.TokenMap[token] = Info.ID
 
+		utils.SuccessResponse(c, gin.H{
+			"token":      token,
+			"expires_at": time.Now().AddDate(1, 0, 0),
+			"user_id":    Info.ID,
+		})
+
 		repositories.InsertToken(c, Info.ID, token)
 		c.JSON(200, gin.H{
 			"token": token,
@@ -67,6 +75,24 @@ func Login(c *gin.Context) {
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
+}
+
+func ChangePassword(c *gin.Context) {
+	auth := c.GetHeader("Authorization")
+	token := strings.TrimPrefix(auth, "Bearer ")
+	token = strings.TrimSpace(token)
+	var passchange models.ChangePasswordRequest
+	err := c.Bind(&passchange)
+	if utils.ErrorCheck(c, err) {
+		return
+	}
+	var req models.User
+	err = utils.ChangePassword(c, token, true, passchange, req)
+	if utils.ErrorCheck(c, err) {
+		utils.ErrorResponse(c, err, 500, "")
+		return
+	}
+	utils.SuccessResponse(c, "password changed")
 }
 
 func Registration(c *gin.Context) {

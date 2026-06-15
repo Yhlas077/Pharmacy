@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"context"
 	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yhlas/basic-pharmacy/internal/models"
+	"github.com/yhlas/basic-pharmacy/internal/repositories"
 )
 
 type ErrorCode string
@@ -21,6 +23,38 @@ func ErrorResponse(c *gin.Context, err error, status int, errorCode ErrorCode) {
 		ErrorMsg:  err.Error(),
 		ErrorCode: string(errorCode),
 	})
+}
+
+func UpdatePassword(c context.Context, token string, passchange models.ChangePasswordRequest) error {
+	db := repositories.GetDB()
+	_, err := db.Exec(c, "update users u set password=$1 from tokens t where t.userid=u.id and t.token=$2", passchange.NewPassword, token)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ChangePassword(c context.Context, token string, word bool, passchange models.ChangePasswordRequest, req models.User) error {
+	req, err := repositories.GetUser(c, token, word)
+	if err != nil {
+		return err
+	}
+	if req.Password != passchange.OldPassword {
+		return errors.New("wrong pass")
+	}
+	err = UpdatePassword(c, token, passchange)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ErrorCheck(c *gin.Context, err error) bool {
+	if err != nil {
+		ErrorResponse(c, err, 401, ErrorCodeForbidden)
+		return true
+	}
+	return false
 }
 
 func SuccessResponse(c *gin.Context, data any) {

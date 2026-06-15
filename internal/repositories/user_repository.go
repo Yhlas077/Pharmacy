@@ -94,6 +94,20 @@ func UserGetByID(c context.Context, id int) (models.User, error) {
 	return item, nil
 }
 
+func GetUser(c context.Context, token string, hasPass bool) (models.User, error) {
+	db := GetDB()
+	var req models.User
+	rows := db.QueryRow(c, "select  u.id, u.name, u.role, u.password, u.email from users u join tokens t on t.user_id=u.id where t.token=$1", token)
+	err := rows.Scan(&req.ID, &req.Name, &req.Role, &req.Password, &req.Email)
+	if !hasPass {
+		req.Password = ""
+	}
+	if err != nil {
+		return models.User{}, err
+	}
+	return req, nil
+}
+
 // POST /users // repository
 func UserCreate(c context.Context, user models.User) (models.User, error) {
 

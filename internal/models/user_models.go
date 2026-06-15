@@ -26,3 +26,8 @@ type UserResponse struct {
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"oldpassword" binding:"required,min=8"`
+	NewPassword string `json:"newpassword" binding:"required,min=8"`
+}

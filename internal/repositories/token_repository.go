@@ -5,9 +5,7 @@ import (
 	"fmt"
 )
 
-func ShowToken(c context.Context, token string) {
-
-}
+func ShowToken(c context.Context, token string) {}
 
 func InsertToken(c context.Context, id int, token string) {
 	GetDB().Exec(c, "INSERT into tokens(user_id, token) values ($1, $2)", id, token)
