@@ -9,6 +9,7 @@ import (
 type PharmacyMedicineFilter struct {
 	Limit  int
 	Offset int
+	Search string
 }
 
 // GET

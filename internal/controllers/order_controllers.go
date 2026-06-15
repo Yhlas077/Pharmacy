@@ -36,6 +36,7 @@ func OrdersList(c *gin.Context) {
 
 	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
 	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
+	filter.Search = c.Query("search")
 
 	list, err := repositories.OrdersList(c.Request.Context(), filter)
 

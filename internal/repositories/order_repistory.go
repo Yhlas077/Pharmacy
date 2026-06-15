@@ -11,6 +11,7 @@ type OrdersFilter struct {
 	Offset     int
 	UserId     int
 	PharmacyID int
+	Search     string
 }
 
 // GET

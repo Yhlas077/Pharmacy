@@ -29,8 +29,20 @@ func Login(c *gin.Context) {
 
 	var token string
 
-	email := c.Query("email")
-	password := c.Query("password")
+	type LoginRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	var req LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, err, 500, "")
+		return
+	}
+
+	email := req.Email
+	password := req.Password
 
 	Info, err := repositories.UserGetByEmail(c, email)
 
@@ -58,14 +70,23 @@ func Login(c *gin.Context) {
 }
 
 func Registration(c *gin.Context) {
-	fmt.Println("REGISTRATION START")
 
-	name := c.Query("name")
-	email := c.Query("email")
-	password := c.Query("password")
+	type RegisterRequest struct {
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
-	fmt.Println("name =", name)
-	fmt.Println("email =", email)
+	var req RegisterRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, err, 500, "")
+		return
+	}
+
+	name := req.Name
+	email := req.Email
+	password := req.Password
 
 	validate := validator.New()
 
@@ -84,11 +105,7 @@ func Registration(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("VALIDATION PASSED")
-
 	repositories.InsertUser(c, name, email, password)
-
-	fmt.Println("INSERT FINISHED")
 
 	utils.SuccessResponse(c, nil)
 }
