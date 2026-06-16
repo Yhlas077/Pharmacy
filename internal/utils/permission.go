@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,8 @@ var TokenMap map[string]int
 
 func RequireAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		fmt.Println("OK")
 
 		authHeader := c.GetHeader("Authorization")
 
@@ -48,6 +51,8 @@ func RequireAdmin() gin.HandlerFunc {
 func RequirePharmacyAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
+		fmt.Println("OK2")
+
 		authHeader := c.GetHeader("Authorization")
 
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
@@ -81,6 +86,9 @@ func RequirePharmacyAdmin() gin.HandlerFunc {
 
 func RequireUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		fmt.Println("OK3")
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			ErrorResponse(c, errors.New("Authorization token required"), 401, ErrorCodeRequired)

@@ -5,6 +5,6 @@ type PharmacyMedicines struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
-	New_price   float64 `json:"new_price"`
-	Category_id int     `json:"category_id"`
+	NewPrice    float64 `json:"new_price"`
+	CategoryId  int     `json:"category_id"`
 }

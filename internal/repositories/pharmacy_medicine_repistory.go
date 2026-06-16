@@ -33,7 +33,7 @@ func PharmacyMedicineList(c context.Context, f PharmacyMedicineFilter) ([]models
 
 	for rows.Next() {
 		item := models.PharmacyMedicines{}
-		err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.Price, &item.New_price, &item.Category_id)
+		err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.Price, &item.NewPrice, &item.CategoryId)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +47,7 @@ func PharmacyMedicineCreate(c context.Context, pharmacy_medicine models.Pharmacy
 
 	_, err := GetDB().Exec(context.Background(),
 		"INSERT INTO pharmacy_medicines(id, name, description, price, new_price, category_id) VALUES ($1,$2,$3,$4,$5,$6)",
-		pharmacy_medicine.ID, pharmacy_medicine.Name, pharmacy_medicine.Description, pharmacy_medicine.Price, pharmacy_medicine.New_price, pharmacy_medicine.Category_id,
+		pharmacy_medicine.ID, pharmacy_medicine.Name, pharmacy_medicine.Description, pharmacy_medicine.Price, pharmacy_medicine.NewPrice, pharmacy_medicine.CategoryId,
 	)
 	if err != nil {
 		return models.PharmacyMedicines{}, err
@@ -73,7 +73,7 @@ func PharmacyMedicineUpdate(c context.Context, id int, req models.PharmacyMedici
 		`UPDATE pharmacy_medicines
 		 SET name=$1, description=$2, price=$3, new_price=$4, category_id=$5 
 		 WHERE id=$6`,
-		req.Name, req.Description, req.Price, req.New_price, req.Category_id, id,
+		req.Name, req.Description, req.Price, req.NewPrice, req.CategoryId, id,
 	)
 
 	return err

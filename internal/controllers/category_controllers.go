@@ -45,7 +45,7 @@ func CategoryList(c *gin.Context) {
 	filter.Limit, _ = strconv.Atoi(c.Query("limit"))
 	filter.Offset, _ = strconv.Atoi(c.Query("offset"))
 	if filter.Limit == 0 {
-		utils.ErrorResponse(c, errors.New("Key is required"), 400, utils.ErrorCodeRequired)
+		utils.ErrorResponse(c, errors.New("limit"), 400, utils.ErrorCodeRequired)
 		return
 	}
 
@@ -105,8 +105,9 @@ func CategoryUpdate(c *gin.Context) {
 
 // ENDPOINT
 func CategoryRoutes(rg *gin.RouterGroup) {
-	rg.POST("/admin/category", CategoryCreate).Use(utils.RequireAdmin())
+	rg.Group("").Use(utils.RequireAdmin())
+	rg.POST("/admin/category", CategoryCreate)
 	rg.GET("/admin/category", CategoryList)
-	rg.DELETE("/admin/category/:id", CategoryDelete).Use(utils.RequireAdmin())
-	rg.PUT("/admin/category/:id", CategoryUpdate).Use(utils.RequireAdmin())
+	rg.DELETE("/admin/category/:id", CategoryDelete)
+	rg.PUT("/admin/category/:id", CategoryUpdate)
 }

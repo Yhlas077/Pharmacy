@@ -61,6 +61,8 @@ func Login(c *gin.Context) {
 		token = GenerateToken(email)
 		utils.TokenMap[token] = Info.ID
 
+		fmt.Println(email, password, time.Now().AddDate(1, 0, 0))
+
 		utils.SuccessResponse(c, gin.H{
 			"token":      token,
 			"expires_at": time.Now().AddDate(1, 0, 0),
