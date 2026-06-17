@@ -145,6 +145,6 @@ func Logout(c *gin.Context) {
 
 func LoginRoute(rg *gin.RouterGroup) {
 	rg.POST("/auth/login", Login)
-	rg.POST("/registration", Registration)
-	rg.DELETE("/logout", Logout)
+	rg.POST("/auth/registration", Registration)
+	rg.POST("/auth/logout", Logout)
 }
