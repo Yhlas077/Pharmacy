@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yhlas/basic-pharmacy/internal/models"
@@ -71,7 +72,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		token := c.Query("token")
 		userID := TokenMap[token]
 
-		if c.Request.URL.Path != "/api/login" &&
+		fmt.Println(token)
+
+		if c.Request.URL.Path != "/api/auth/login" &&
 			c.Request.URL.Path != "/api/registration" &&
 			c.Request.URL.Path != "/api/logout" {
 			if userID == 0 {

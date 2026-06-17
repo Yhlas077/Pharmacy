@@ -61,17 +61,16 @@ func Login(c *gin.Context) {
 		token = GenerateToken(email)
 		utils.TokenMap[token] = Info.ID
 
-		fmt.Println(email, password, time.Now().AddDate(1, 0, 0))
+		repositories.InsertToken(c, Info.ID, token)
 
 		utils.SuccessResponse(c, gin.H{
-			"token":      token,
-			"expires_at": time.Now().AddDate(1, 0, 0),
-			"user_id":    Info.ID,
-		})
-
-		repositories.InsertToken(c, Info.ID, token)
-		c.JSON(200, gin.H{
 			"token": token,
+			"user": gin.H{
+				"id":    Info.ID,
+				"name":  Info.Name,
+				"email": Info.Email,
+				"role":  Info.Role,
+			},
 		})
 	} else {
 		utils.ErrorResponse(c, err, 500, "")
@@ -146,7 +145,7 @@ func Logout(c *gin.Context) {
 }
 
 func LoginRoute(rg *gin.RouterGroup) {
-	rg.POST("/login", Login)
+	rg.POST("/auth/login", Login)
 	rg.POST("/registration", Registration)
 	rg.DELETE("/logout", Logout)
 }
