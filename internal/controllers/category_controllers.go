@@ -19,7 +19,7 @@ func GetCategory(c *gin.Context) {
 	if utils.ErrorCheck(c, err) {
 		return
 	}
-	utils.SuccessResponse(c, req)
+	utils.SuccessResponse(c, req, models.Meta{})
 }
 
 // POST /Category  // controllers
@@ -40,7 +40,7 @@ func CategoryCreate(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // GET /Category
@@ -63,7 +63,15 @@ func CategoryList(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, list)
+	var totalUsers int
+	query := "SELECT COUNT(*) FROM categories"
+	err = repositories.GetDB().QueryRow(c, query).Scan(&totalUsers)
+
+	utils.SuccessResponse(c, list, models.Meta{
+		Total: totalUsers,
+		Limit: filter.Limit,
+		Offset:filter.Offset,
+	})
 }
 
 // DELETE /Category/:id
@@ -80,7 +88,7 @@ func CategoryDelete(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // PUT /Category/:id
@@ -107,7 +115,7 @@ func CategoryUpdate(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // ENDPOINT

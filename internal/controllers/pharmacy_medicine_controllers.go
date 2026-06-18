@@ -32,7 +32,7 @@ func PharmacyMedicineCreate(c *gin.Context) {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // GET /users
@@ -52,7 +52,15 @@ func PharmacyMedicineList(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, list)
+	var totalUsers int
+	query := "SELECT COUNT(*) FROM pharmacy_medicines"
+	err = repositories.GetDB().QueryRow(c, query).Scan(&totalUsers)
+
+	utils.SuccessResponse(c, list, models.Meta{
+		Total:  totalUsers,
+		Limit:  filter.Limit,
+		Offset: filter.Offset,
+	})
 
 }
 
@@ -70,7 +78,7 @@ func PharmacyMedicineDelete(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // PUT /users/:id
@@ -96,7 +104,7 @@ func PharmacyMedicineUpdate(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 func GetPharmacyMedicine(c *gin.Context) {
@@ -106,16 +114,16 @@ func GetPharmacyMedicine(c *gin.Context) {
 	if utils.ErrorCheck(c, err) {
 		return
 	}
-	utils.SuccessResponse(c, req)
+	utils.SuccessResponse(c, req, models.Meta{})
 }
 
 // ENDPOINT
 func PharmacyMedicineRoutes(rg *gin.RouterGroup) {
 	rg.Group("").Use(utils.RequirePharmacyAdmin())
-	rg.POST("/admin/pharmacy_medicine", PharmacyMedicineCreate)
-	rg.GET("/admin/pharmacy_medicine", PharmacyMedicineList)
-	rg.DELETE("/admin/pharmacy_medicine/:id", PharmacyMedicineDelete)
-	rg.PUT("/admin/pharmacy_medicine/:id", PharmacyMedicineUpdate)
-	rg.GET("/admin/pharmacy_medicines/get/:id", GetPharmacyMedicine)
+	rg.POST("/admin/medicines", PharmacyMedicineCreate)
+	rg.GET("/admin/medicines", PharmacyMedicineList)
+	rg.DELETE("/admin/medicines/:id", PharmacyMedicineDelete)
+	rg.PUT("/admin/medicines/:id", PharmacyMedicineUpdate)
+	rg.GET("/admin/medicines/get/:id", GetPharmacyMedicine)
 
 }

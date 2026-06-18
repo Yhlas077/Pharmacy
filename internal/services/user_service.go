@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"time"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
@@ -46,8 +47,8 @@ func GenerateSecureToken(length int) string {
 	return hex.EncodeToString(b)
 }
 
-func RegistrationService(c context.Context, name string, role string, password string, email string) error {
-	return repositories.InsertUser(c, name, email, password)
+func RegistrationService(c context.Context, name string, role string, password string, email string, phone string, region string) error {
+	return repositories.InsertUser(c, name, phone, region, email, password)
 }
 
 func LoginService(c context.Context, email string, password string) (string, error) {
@@ -59,7 +60,10 @@ func LoginService(c context.Context, email string, password string) (string, err
 		return "", errors.New("wrong password")
 	}
 	Token := GenerateSecureToken(32)
-	err = repositories.InsertToken(c, user.ID, Token)
+
+	expiry := time.Now().Add(24 * time.Hour)
+
+	err = repositories.InsertToken(c, user.ID, Token, expiry)
 	if err != nil {
 		return "", err
 	}

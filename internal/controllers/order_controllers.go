@@ -26,7 +26,7 @@ func OrdersCreate(c *gin.Context) {
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 	}
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil,models.Meta{})
 }
 
 // GET /Orders
@@ -46,7 +46,15 @@ func OrdersList(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, list)
+	var totalUsers int
+	query := "SELECT COUNT(*) FROM orders"
+	err = repositories.GetDB().QueryRow(c, query).Scan(&totalUsers)
+
+	utils.SuccessResponse(c, list, models.Meta{
+		Total: totalUsers,
+		Limit: filter.Limit,
+		Offset:filter.Offset,
+	})
 
 }
 
@@ -63,7 +71,7 @@ func OrdersDelete(c *gin.Context) {
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // PUT /Orders/:id
@@ -88,7 +96,7 @@ func OrdersUpdate(c *gin.Context) {
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 func GetOrder(c *gin.Context) {
@@ -98,7 +106,7 @@ func GetOrder(c *gin.Context) {
 	if utils.ErrorCheck(c, err) {
 		return
 	}
-	utils.SuccessResponse(c, req)
+	utils.SuccessResponse(c, req, models.Meta{})
 }
 
 // ENDPOINT

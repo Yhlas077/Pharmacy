@@ -27,7 +27,7 @@ func PharmacyCreate(c *gin.Context) {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // GET /Pharmacies
@@ -47,7 +47,15 @@ func PharmacyList(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, list)
+	var totalUsers int
+	query := "SELECT COUNT(*) FROM pharmacies"
+	err = repositories.GetDB().QueryRow(c, query).Scan(&totalUsers)
+
+	utils.SuccessResponse(c, list, models.Meta{
+		Total: totalUsers,
+		Limit: filter.Limit,
+		Offset:filter.Offset,
+	})
 }
 
 // DELETE /Pharmacies/:id
@@ -63,7 +71,7 @@ func PharmacyDelete(c *gin.Context) {
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // PUT /Pharmacies/:id
@@ -89,7 +97,7 @@ func PharmacyUpdate(c *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 func GetPharmacy(c *gin.Context) {
@@ -99,7 +107,7 @@ func GetPharmacy(c *gin.Context) {
 	if utils.ErrorCheck(c, err) {
 		return
 	}
-	utils.SuccessResponse(c, req)
+	utils.SuccessResponse(c, req, models.Meta{})
 }
 
 // ENDPOINT

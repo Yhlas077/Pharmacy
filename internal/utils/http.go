@@ -3,7 +3,9 @@ package utils
 import (
 	"context"
 	"errors"
-	"fmt"
+	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yhlas/basic-pharmacy/internal/models"
@@ -43,30 +45,57 @@ func ErrorCheck(c *gin.Context, err error) bool {
 	return false
 }
 
-func SuccessResponse(c *gin.Context, data any) {
-	c.JSON(200, gin.H{
+func SuccessResponse(c *gin.Context, data any, meta models.Meta) {
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    data,
+		"meta":    models.Meta{
+			Total: meta.Total,
+			Limit: meta.Limit,
+			Offset: meta.Offset,
+		},
+	})
+}
+
+func LoginSuccess(c *gin.Context, token string, expiry time.Time, Info models.User) {
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"token":      token,
+			"expires_at": expiry.Format(time.RFC3339),
+			"user": gin.H{
+				"id":    Info.ID,
+				"name":  Info.Name,
+				"email": Info.Email,
+				"role":  Info.Role,
+			},
+		},
 	})
 }
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		auth := c.GetHeader("Authorization")
+		token := strings.TrimPrefix(auth, "Bearer ")
+		token = strings.TrimSpace(token)
 
-		token := c.Query("token")
-		userID := TokenMap[token]
-
-		fmt.Println(token)
-
-		if c.Request.URL.Path != "/api/auth/login" &&
-			c.Request.URL.Path != "/api/registration" &&
-			c.Request.URL.Path != "/api/logout" {
-			if userID == 0 {
-				ErrorResponse(c, errors.New("token is missing"), 400, ErrorCodeRequired)
-				c.Abort()
-				return
-			}
+		if c.Request.URL.Path == "/api/auth/login" ||
+			c.Request.URL.Path == "/api/register" ||
+			c.Request.URL.Path == "/api/logout" {
+			c.Next()
+			return
 		}
+
+		var userID int
+		query := "SELECT user_id FROM tokens WHERE token = $1"
+		err := repositories.GetDB().QueryRow(c, query, token).Scan(&userID)
+
+		if err != nil || userID == 0 {
+			ErrorResponse(c, errors.New("token is missing or invalid"), 400, ErrorCodeRequired)
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

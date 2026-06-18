@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -28,6 +29,8 @@ func GenerateToken(email string) string {
 }
 
 func Login(c *gin.Context) {
+
+	expiry := time.Now().Add(24 * time.Hour)
 
 	var token string
 
@@ -61,17 +64,9 @@ func Login(c *gin.Context) {
 		token = GenerateToken(email)
 		utils.TokenMap[token] = Info.ID
 
-		repositories.InsertToken(c, Info.ID, token)
+		repositories.InsertToken(c, Info.ID, token, expiry)
 
-		utils.SuccessResponse(c, gin.H{
-			"token": token,
-			"user": gin.H{
-				"id":    Info.ID,
-				"name":  Info.Name,
-				"email": Info.Email,
-				"role":  Info.Role,
-			},
-		})
+		utils.LoginSuccess(c, token, expiry, Info)
 	} else {
 		utils.ErrorResponse(c, err, 500, "")
 		return
@@ -93,13 +88,15 @@ func ChangePassword(c *gin.Context) {
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
-	utils.SuccessResponse(c, "password changed")
+	utils.SuccessResponse(c, "password changed", models.Meta{})
 }
 
 func Registration(c *gin.Context) {
 
 	type RegisterRequest struct {
 		Name     string `json:"name"`
+		Phone    string `json:"phone"`
+		Region   string `json:"region"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
@@ -112,6 +109,8 @@ func Registration(c *gin.Context) {
 	}
 
 	name := req.Name
+	phone := req.Phone
+	region := req.Region
 	email := req.Email
 	password := req.Password
 
@@ -119,6 +118,8 @@ func Registration(c *gin.Context) {
 
 	newUser := models.User{
 		Name:     name,
+		Phone:    phone,
+		Region:   region,
 		Email:    email,
 		Password: password,
 		Role:     "user",
@@ -132,20 +133,21 @@ func Registration(c *gin.Context) {
 		return
 	}
 
-	repositories.InsertUser(c, name, email, password)
+	repositories.InsertUser(c, name, phone, region, email, password)
 
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 func Logout(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
 
 	repositories.DeleteToken(c, token)
-	utils.SuccessResponse(c, nil)
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 func LoginRoute(rg *gin.RouterGroup) {
 	rg.POST("/auth/login", Login)
-	rg.POST("/auth/registration", Registration)
+	rg.POST("/auth/register", Registration)
 	rg.POST("/auth/logout", Logout)
+	rg.POST("/changepassword", ChangePassword)
 }

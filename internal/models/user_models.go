@@ -22,17 +22,19 @@ type UserCreateRequest struct {
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Region   string `json:"region"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
 }
 
 type UserResponse struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Password  string `json:"password"`
-	Role  string `json:"role"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
 }
 
 type ChangePasswordRequest struct {
@@ -41,5 +43,13 @@ type ChangePasswordRequest struct {
 }
 
 type UserUpdateRequest struct {
-	Name string `json:"name"`
+	Name   string `json:"name"`
+	Phone  string `json:"phone"`
+	Region string `josn:"region"`
+}
+
+type Meta struct {
+	Total int `json:"total"`
+	Limit int `json:"limit"`
+	Offset int `json:"offset"`
 }
