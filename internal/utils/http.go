@@ -35,21 +35,6 @@ func UpdatePassword(c context.Context, token string, passchange models.ChangePas
 	return nil
 }
 
-func ChangePassword(c context.Context, token string, word bool, passchange models.ChangePasswordRequest, req models.User) error {
-	req, err := repositories.GetUser(c, token, word)
-	if err != nil {
-		return err
-	}
-	if req.Password != passchange.OldPassword {
-		return errors.New("wrong pass")
-	}
-	err = UpdatePassword(c, token, passchange)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func ErrorCheck(c *gin.Context, err error) bool {
 	if err != nil {
 		ErrorResponse(c, err, 401, ErrorCodeForbidden)
@@ -61,7 +46,6 @@ func ErrorCheck(c *gin.Context, err error) bool {
 func SuccessResponse(c *gin.Context, data any) {
 	c.JSON(200, gin.H{
 		"success": true,
-		"error":   false,
 		"data":    data,
 	})
 }

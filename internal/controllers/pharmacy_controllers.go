@@ -5,6 +5,7 @@ import (
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/services"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func PharmacyCreate(c *gin.Context) {
 		return
 	}
 
-	_, err := repositories.PharmacyCreate(c.Request.Context(), req)
+	err := services.CreatePharmacyService(c.Request.Context(), req.Name, req.Address, req.PharmacyHours)
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
@@ -75,7 +76,7 @@ func PharmacyUpdate(c *gin.Context) {
 		return
 	}
 
-	var req models.Pharmacies
+	var req models.PharmacyCreateRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
@@ -91,10 +92,21 @@ func PharmacyUpdate(c *gin.Context) {
 	utils.SuccessResponse(c, nil)
 }
 
+func GetPharmacy(c *gin.Context) {
+	idstr := c.Param("id")
+	id, _ := strconv.Atoi(idstr)
+	req, err := services.GetPharmacyService(c, id)
+	if utils.ErrorCheck(c, err) {
+		return
+	}
+	utils.SuccessResponse(c, req)
+}
+
 // ENDPOINT
 func PharmacyRoutes(rg *gin.RouterGroup) {
 	rg.POST("/admin/pharmacies", PharmacyCreate)
 	rg.GET("/admin/pharmacies", PharmacyList)
 	rg.DELETE("/admin/pharmacies/:id", PharmacyDelete)
 	rg.PUT("/admin/pharmacies/:id", PharmacyUpdate)
+	rg.GET("/admin/pharmacies/get/:id", GetPharmacy)
 }

@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/services"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -69,27 +71,40 @@ func UserDelete(c *gin.Context) {
 
 // PUT /users/:id
 func UserUpdate(c *gin.Context) {
-	idStr := c.Param("id")
+	auth := c.GetHeader("Authorization")
+	token := strings.TrimPrefix(auth, "Bearer ")
+	token = strings.TrimSpace(token)
 
-	id, err := strconv.Atoi(idStr)
+	var req models.UserUpdateRequest
+	err := c.Bind(&req)
+
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
-
-	var req models.User
 
 	if err := c.BindJSON(&req); err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
-	err = repositories.UserUpdate(c.Request.Context(), id, req)
+	err = services.UpdateUserService(c.Request.Context(), token, req)
 	if err != nil {
 		utils.ErrorResponse(c, err, 500, "")
 		return
 	}
 	utils.SuccessResponse(c, nil)
+}
+
+func GetUser(c *gin.Context) {
+	auth := c.GetHeader("Authorization")
+	token := strings.TrimPrefix(auth, "Bearer ")
+	token = strings.TrimSpace(token)
+	req, err := services.GetUserService(c, token, false)
+	if utils.ErrorCheck(c, err) {
+		return
+	}
+	utils.SuccessResponse(c, req)
 }
 
 // ENDPOINT
@@ -98,5 +113,6 @@ func UserRoutes(rg *gin.RouterGroup) {
 	rg.POST("/users", UserCreate)
 	rg.GET("/users", UserList)
 	rg.DELETE("/users/:id", UserDelete)
-	rg.PUT("/users/:id", UserUpdate)
+	rg.PUT("/users/", UserUpdate)
+	rg.GET("/user/me", GetUser)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/services"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -86,8 +87,8 @@ func ChangePassword(c *gin.Context) {
 	if utils.ErrorCheck(c, err) {
 		return
 	}
-	var req models.User
-	err = utils.ChangePassword(c, token, true, passchange, req)
+	var req models.UserResponse
+	err = services.ChangePasswordService(c, token, true, passchange, req)
 	if utils.ErrorCheck(c, err) {
 		utils.ErrorResponse(c, err, 500, "")
 		return

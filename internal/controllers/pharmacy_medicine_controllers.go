@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/services"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -13,14 +15,18 @@ import (
 // POST /users  // controllers
 func PharmacyMedicineCreate(c *gin.Context) {
 
-	var req models.PharmacyMedicines
+	auth := c.GetHeader("Authorization")
+	token := strings.TrimPrefix(auth, "Bearer ")
+	token = strings.TrimSpace(token)
+
+	var req models.PharmacyMedicinesCreateRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 		return
 	}
 
-	_, err := repositories.PharmacyMedicineCreate(c.Request.Context(), req)
+	err := services.CreatePharmacyMedicineService(c.Request.Context(), req.Name, req.Description, req.Price, req.NewPrice, req.CategoryId, token)
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
@@ -77,7 +83,7 @@ func PharmacyMedicineUpdate(c *gin.Context) {
 		return
 	}
 
-	var req models.PharmacyMedicines
+	var req models.PharmacyMedicinesCreateRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
@@ -93,6 +99,16 @@ func PharmacyMedicineUpdate(c *gin.Context) {
 	utils.SuccessResponse(c, nil)
 }
 
+func GetPharmacyMedicine(c *gin.Context) {
+	idstr := c.Param("id")
+	id, _ := strconv.Atoi(idstr)
+	req, err := services.GetPharmacyMedicineServices(c, id)
+	if utils.ErrorCheck(c, err) {
+		return
+	}
+	utils.SuccessResponse(c, req)
+}
+
 // ENDPOINT
 func PharmacyMedicineRoutes(rg *gin.RouterGroup) {
 	rg.Group("").Use(utils.RequirePharmacyAdmin())
@@ -100,4 +116,6 @@ func PharmacyMedicineRoutes(rg *gin.RouterGroup) {
 	rg.GET("/admin/pharmacy_medicine", PharmacyMedicineList)
 	rg.DELETE("/admin/pharmacy_medicine/:id", PharmacyMedicineDelete)
 	rg.PUT("/admin/pharmacy_medicine/:id", PharmacyMedicineUpdate)
+	rg.GET("/admin/pharmacy_medicines/get/:id", GetPharmacyMedicine)
+
 }

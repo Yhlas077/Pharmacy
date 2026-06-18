@@ -21,6 +21,9 @@ func LengthStr(l []any) string {
 func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, error) {
 
 	db := GetDB()
+	if f.Limit == 0 {
+		f.Limit = 10
+	}
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 
@@ -54,16 +57,16 @@ func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, err
 }
 
 // POST /Pharmacies // repository
-func PharmacyCreate(c context.Context, Pharmacy models.Pharmacies) (models.Pharmacies, error) {
+func PharmacyCreate(c context.Context, name string, address string, hours int) error {
 
 	_, err := GetDB().Exec(context.Background(),
-		"INSERT INTO pharmacies(id, name, address, pharmacy_hours) VALUES ($1,$2,$3,$4)",
-		Pharmacy.ID, Pharmacy.Name, Pharmacy.Address, Pharmacy.PharmacyHours,
+		"INSERT INTO pharmacies(name, address, pharmacy_hours) VALUES ($1,$2,$3)",
+		name, address, hours,
 	)
 	if err != nil {
-		return models.Pharmacies{}, err
+		return err
 	}
-	return Pharmacy, nil
+	return nil
 }
 
 func PharmacyDelete(c context.Context, id int) error {
@@ -77,7 +80,7 @@ func PharmacyDelete(c context.Context, id int) error {
 	return err
 }
 
-func PharmacyUpdate(c context.Context, id int, req models.Pharmacies) error {
+func PharmacyUpdate(c context.Context, id int, req models.PharmacyCreateRequest) error {
 	db := GetDB()
 
 	_, err := db.Exec(c,
@@ -88,4 +91,15 @@ func PharmacyUpdate(c context.Context, id int, req models.Pharmacies) error {
 	)
 
 	return err
+}
+
+func GetPharmacy(c context.Context, id int) (models.PharmacyResponse, error) {
+	db := GetDB()
+	var req models.PharmacyResponse
+	rows := db.QueryRow(c, "select  id, name, address, pharmacy_hours from pharmacies where id=$1", id)
+	err := rows.Scan(&req.Id, &req.Name, &req.Address, &req.PharmacyHours)
+	if err != nil {
+		return models.PharmacyResponse{}, err
+	}
+	return req, nil
 }

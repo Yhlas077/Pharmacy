@@ -5,6 +5,7 @@ import (
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/services"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func OrdersCreate(c *gin.Context) {
 		return
 	}
 
-	_, err := repositories.OrdersCreate(c.Request.Context(), req)
+	err := services.CreateOrderService(c.Request.Context(), req.Name, req.Price, req.Description)
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
@@ -75,7 +76,7 @@ func OrdersUpdate(c *gin.Context) {
 		return
 	}
 
-	var req models.Orders
+	var req models.OrderCreateRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
@@ -90,10 +91,22 @@ func OrdersUpdate(c *gin.Context) {
 	utils.SuccessResponse(c, nil)
 }
 
+func GetOrder(c *gin.Context) {
+	idstr := c.Param("id")
+	id, _ := strconv.Atoi(idstr)
+	req, err := services.GetOrderServices(c, id)
+	if utils.ErrorCheck(c, err) {
+		return
+	}
+	utils.SuccessResponse(c, req)
+}
+
 // ENDPOINT
 func OrdersRoutes(rg *gin.RouterGroup) {
 	rg.POST("/admin/orders", OrdersCreate)
 	rg.GET("/admin/orders", OrdersList)
 	rg.DELETE("/admin/orders/:id", OrdersDelete)
 	rg.PUT("/admin/orders/:id", OrdersUpdate)
+	rg.GET("/admin/orders/get/:id", GetOrder)
+
 }

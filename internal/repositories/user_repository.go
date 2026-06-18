@@ -94,16 +94,16 @@ func UserGetByID(c context.Context, id int) (models.User, error) {
 	return item, nil
 }
 
-func GetUser(c context.Context, token string, hasPass bool) (models.User, error) {
+func GetUser(c context.Context, token string, hasPass bool) (models.UserResponse, error) {
 	db := GetDB()
-	var req models.User
+	var req models.UserResponse
 	rows := db.QueryRow(c, "select  u.id, u.name, u.role, u.password, u.email from users u join tokens t on t.user_id=u.id where t.token=$1", token)
 	err := rows.Scan(&req.ID, &req.Name, &req.Role, &req.Password, &req.Email)
 	if !hasPass {
 		req.Password = ""
 	}
 	if err != nil {
-		return models.User{}, err
+		return models.UserResponse{}, err
 	}
 	return req, nil
 }
@@ -132,15 +132,22 @@ func UserDelete(c context.Context, id int) error {
 	return err
 }
 
-func UserUpdate(c context.Context, id int, req models.User) error {
+func UpdatePassword(c context.Context, token string, passchange models.ChangePasswordRequest) error {
 	db := GetDB()
 
 	_, err := db.Exec(c,
-		`UPDATE users 
-		 SET name=$1, email=$2, password=$3, role=$4 
-		 WHERE id=$5`,
-		req.Name, req.Email, req.Password, req.Role, id,
-	)
+		`update users u set password=$1 from tokens t where t.user_id=u.id and t.token=$2`,
+		passchange.NewPassword, token)
 
 	return err
+}
+
+func UpdateUser(c context.Context, token string, req models.UserUpdateRequest) error {
+	db := GetDB()
+
+	_, err := db.Exec(c, "update users u set name=$1 from tokens t where t.user_id=u.id and t.token=$2", req.Name, token)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -6,19 +6,26 @@ import (
 
 	"github.com/yhlas/basic-pharmacy/internal/models"
 	"github.com/yhlas/basic-pharmacy/internal/repositories"
+	"github.com/yhlas/basic-pharmacy/internal/services"
 	"github.com/yhlas/basic-pharmacy/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-// IMPLEMENT: service folder for all endpoints
-// example: CategoryCreate(req models.CategoryRequest) res models.CategoryResponse
-// example in controller call (insted of repository): service.CategoryCreate(req)
+func GetCategory(c *gin.Context) {
+	categoryidstr := c.Param("id")
+	categoryid, _ := strconv.Atoi(categoryidstr)
+	req, err := services.GetCategoryService(c, categoryid)
+	if utils.ErrorCheck(c, err) {
+		return
+	}
+	utils.SuccessResponse(c, req)
+}
 
 // POST /Category  // controllers
 func CategoryCreate(c *gin.Context) {
 
-	var req models.Category
+	var req models.CategoryCreateRequest
 
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -26,7 +33,7 @@ func CategoryCreate(c *gin.Context) {
 		return
 	}
 
-	_, err = repositories.CategoryCreate(c.Request.Context(), req)
+	err = services.CreateCategoryService(c, req.Name)
 
 	if err != nil {
 		utils.ErrorResponse(c, err, 500, "")
@@ -86,7 +93,7 @@ func CategoryUpdate(c *gin.Context) {
 		return
 	}
 
-	var req models.Category
+	var req models.CategoryCreateRequest
 
 	err = c.BindJSON(&req)
 	if err != nil {
@@ -94,7 +101,7 @@ func CategoryUpdate(c *gin.Context) {
 		return
 	}
 
-	err = repositories.CategoryUpdate(c.Request.Context(), id, req)
+	err = services.UpdateCategoryService(c.Request.Context(), id, req)
 	if err != nil {
 		utils.ErrorResponse(c, err, 500, utils.ErrorCodeRequired)
 		return
@@ -110,4 +117,5 @@ func CategoryRoutes(rg *gin.RouterGroup) {
 	rg.GET("/admin/category", CategoryList)
 	rg.DELETE("/admin/category/:id", CategoryDelete)
 	rg.PUT("/admin/category/:id", CategoryUpdate)
+	rg.GET("/admin/category/get/:id", GetCategory)
 }
