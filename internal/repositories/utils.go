@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var db *pgx.Conn
+var db *pgxpool.Pool
 
 // CONNECT DB
 func ConnectDB(config string) {
-	conn, err := pgx.Connect(context.Background(), config)
+	ctx := context.Background()
+	conn, err := pgxpool.New(ctx, config)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "DB error: %v\n", err)
 		os.Exit(1)
@@ -20,6 +21,6 @@ func ConnectDB(config string) {
 	db = conn
 }
 
-func GetDB() *pgx.Conn {
+func GetDB() *pgxpool.Pool {
 	return db
 }

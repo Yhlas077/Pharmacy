@@ -31,6 +31,24 @@ func UserCreate(c *gin.Context) {
 	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
+// DELETE /users/:id
+func UserDelete(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
+		return
+	}
+
+	err = repositories.UserDelete(c.Request.Context(), id)
+	if err != nil {
+		utils.ErrorResponse(c, err, 500, "")
+		return
+	}
+
+	utils.SuccessResponse(c, nil, models.Meta{})
+}
+
+
 // GET /users
 func UserList(c *gin.Context) {
 
@@ -60,22 +78,6 @@ func UserList(c *gin.Context) {
 	})
 }
 
-// DELETE /users/:id
-func UserDelete(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
-		return
-	}
-
-	err = repositories.UserDelete(c.Request.Context(), id)
-	if err != nil {
-		utils.ErrorResponse(c, err, 500, "")
-		return
-	}
-
-	utils.SuccessResponse(c, nil, models.Meta{})
-}
 
 // PUT /users/:id
 func UserUpdate(c *gin.Context) {

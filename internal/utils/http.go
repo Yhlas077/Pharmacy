@@ -2,7 +2,7 @@ package utils
 
 import (
 	"context"
-	"errors"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -49,9 +49,9 @@ func SuccessResponse(c *gin.Context, data any, meta models.Meta) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    data,
-		"meta":    models.Meta{
-			Total: meta.Total,
-			Limit: meta.Limit,
+		"meta": models.Meta{
+			Total:  meta.Total,
+			Limit:  meta.Limit,
 			Offset: meta.Offset,
 		},
 	})
@@ -73,28 +73,117 @@ func LoginSuccess(c *gin.Context, token string, expiry time.Time, Info models.Us
 	})
 }
 
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		auth := c.GetHeader("Authorization")
-		token := strings.TrimPrefix(auth, "Bearer ")
-		token = strings.TrimSpace(token)
+// func AuthMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		auth := c.GetHeader("Authorization")
+// 		token := strings.TrimPrefix(auth, "Bearer ")
+// 		token = strings.TrimSpace(token)
 
-		if c.Request.URL.Path == "/api/auth/login" ||
-			c.Request.URL.Path == "/api/register" ||
-			c.Request.URL.Path == "/api/logout" {
+// 		if c.Request.URL.Path == "/api/auth/login" ||
+// 			c.Request.URL.Path == "/api/register" ||
+// 			c.Request.URL.Path == "/api/logout" {
+// 			c.Next()
+// 			return
+// 		}
+
+// 		var userID int
+// 		query := "SELECT user_id FROM tokens WHERE token = $1"
+// 		err := repositories.GetDB().QueryRow(c, query, token).Scan(&userID)
+
+// 		if err != nil || userID == 0 {
+// 			ErrorResponse(c, errors.New("token is missing or invalid"), 400, ErrorCodeRequired)
+// 			c.Abort()
+// 			return
+// 		}
+
+// 		c.Next()
+// 	}
+// }
+
+// func AuthMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		if c.Request.URL.Path != "/api/login" && c.Request.URL.Path != "/api/registration" {
+// 			auth := c.GetHeader("Authorization")
+// 			token := strings.TrimPrefix(auth, "Bearer ")
+// 			token = strings.TrimSpace(token)
+// 			userId, err := repositories.GetUserIdByToken(c.Request.Context(), token)
+// 			var expiresAt time.Time
+// 			expiresAt, err = repositories.GetExpiresAtByToken(c, token)
+// 			if expiresAt.Before(time.Now()) {
+// 				return
+// 			}
+// 			if userId == 0 || err != nil {
+// 				c.JSON(400, "token missing")
+// 				c.Abort()
+// 				return
+// 			}
+// 		}
+// 		c.Next()
+// 	}
+// }
+
+func AuthMiddleware() gin.HandlerFunc {
+	publicPaths := map[string]bool{
+		"/api/auth/login":    true,
+		"/api/auth/register": true,
+		"/api/auth/logout":   true,
+	}
+
+	return func(c *gin.Context) {
+		if publicPaths[c.Request.URL.Path] {
 			c.Next()
 			return
 		}
 
-		var userID int
-		query := "SELECT user_id FROM tokens WHERE token = $1"
-		err := repositories.GetDB().QueryRow(c, query, token).Scan(&userID)
-
-		if err != nil || userID == 0 {
-			ErrorResponse(c, errors.New("token is missing or invalid"), 400, ErrorCodeRequired)
+		auth := c.GetHeader("Authorization")
+		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Success: false, ErrorMsg: "authorization token required",
+				ErrorCode: string(ErrorCodeRequired),
+			})
 			c.Abort()
 			return
 		}
+		token := strings.TrimSpace(strings.TrimPrefix(auth, "Bearer "))
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Success: false, ErrorMsg: "authorization token required",
+				ErrorCode: string(ErrorCodeRequired),
+			})
+			c.Abort()
+			return
+		}
+
+		ctx := c.Request.Context()
+
+		userID, err := repositories.GetUserIdByToken(ctx, token)
+		if err != nil || userID == 0 {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Success: false, ErrorMsg: "invalid or missing token",
+				ErrorCode: string(ErrorCodeForbidden),
+			})
+			c.Abort()
+			return
+		}
+
+		expiresAt, err := repositories.GetExpiresAtByToken(ctx, token)
+		log.Println(expiresAt, err)
+		if err != nil || expiresAt.Before(time.Now()) {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Success: false, ErrorMsg: "token expired",
+				ErrorCode: string(ErrorCodeForbidden),
+			})
+			c.Abort()
+			return
+		}
+
+		if TokenMap == nil {
+			TokenMap = map[string]int{}
+		}
+		TokenMap[token] = userID
+
+		c.Set("userID", userID)
+		c.Set("token", token)
 
 		c.Next()
 	}

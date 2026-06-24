@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 	"time"
@@ -29,7 +28,7 @@ func main() {
 
 	repositories.ConnectDB(secretConnectionText)
 
-	defer repositories.GetDB().Close(context.Background())
+	defer repositories.GetDB().Close()
 
 	r := gin.Default()
 

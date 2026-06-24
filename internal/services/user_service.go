@@ -61,7 +61,7 @@ func LoginService(c context.Context, email string, password string) (string, err
 	}
 	Token := GenerateSecureToken(32)
 
-	expiry := time.Now().Add(24 * time.Hour)
+	expiry := time.Now().Add(30 * 6 * 24 * time.Hour)
 
 	err = repositories.InsertToken(c, user.ID, Token, expiry)
 	if err != nil {
