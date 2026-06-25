@@ -73,55 +73,6 @@ func LoginSuccess(c *gin.Context, token string, expiry time.Time, Info models.Us
 	})
 }
 
-// func AuthMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		auth := c.GetHeader("Authorization")
-// 		token := strings.TrimPrefix(auth, "Bearer ")
-// 		token = strings.TrimSpace(token)
-
-// 		if c.Request.URL.Path == "/api/auth/login" ||
-// 			c.Request.URL.Path == "/api/register" ||
-// 			c.Request.URL.Path == "/api/logout" {
-// 			c.Next()
-// 			return
-// 		}
-
-// 		var userID int
-// 		query := "SELECT user_id FROM tokens WHERE token = $1"
-// 		err := repositories.GetDB().QueryRow(c, query, token).Scan(&userID)
-
-// 		if err != nil || userID == 0 {
-// 			ErrorResponse(c, errors.New("token is missing or invalid"), 400, ErrorCodeRequired)
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		c.Next()
-// 	}
-// }
-
-// func AuthMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		if c.Request.URL.Path != "/api/login" && c.Request.URL.Path != "/api/registration" {
-// 			auth := c.GetHeader("Authorization")
-// 			token := strings.TrimPrefix(auth, "Bearer ")
-// 			token = strings.TrimSpace(token)
-// 			userId, err := repositories.GetUserIdByToken(c.Request.Context(), token)
-// 			var expiresAt time.Time
-// 			expiresAt, err = repositories.GetExpiresAtByToken(c, token)
-// 			if expiresAt.Before(time.Now()) {
-// 				return
-// 			}
-// 			if userId == 0 || err != nil {
-// 				c.JSON(400, "token missing")
-// 				c.Abort()
-// 				return
-// 			}
-// 		}
-// 		c.Next()
-// 	}
-// }
-
 func AuthMiddleware() gin.HandlerFunc {
 	publicPaths := map[string]bool{
 		"/api/auth/login":    true,

@@ -48,7 +48,6 @@ func UserDelete(c *gin.Context) {
 	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
-
 // GET /users
 func UserList(c *gin.Context) {
 
@@ -72,12 +71,11 @@ func UserList(c *gin.Context) {
 	err = repositories.GetDB().QueryRow(c, query).Scan(&totalUsers)
 
 	utils.SuccessResponse(c, list, models.Meta{
-		Total: totalUsers,
-		Limit: filter.Limit,
-		Offset:filter.Offset,
+		Total:  totalUsers,
+		Limit:  filter.Limit,
+		Offset: filter.Offset,
 	})
 }
-
 
 // PUT /users/:id
 func UserUpdate(c *gin.Context) {
@@ -120,9 +118,9 @@ func GetUser(c *gin.Context) {
 // ENDPOINT
 func UserRoutes(rg *gin.RouterGroup) {
 	rg.Group("").Use(utils.RequireUser())
-	rg.POST("/users", UserCreate)
-	rg.GET("/users", UserList)
-	rg.DELETE("/users/:id", UserDelete)
-	rg.PUT("/me", UserUpdate)
-	rg.GET("/me", GetUser)
+	rg.POST("/admin/users", UserCreate)
+	rg.GET("/admin/users", UserList)
+	rg.DELETE("/admin/users/:id", UserDelete)
+	rg.PUT("/admin/users/:id", UserUpdate)
+	rg.GET("/admin/users/:id", GetUser)
 }

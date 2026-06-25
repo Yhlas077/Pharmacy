@@ -26,7 +26,7 @@ func OrdersCreate(c *gin.Context) {
 	if err != nil {
 		utils.ErrorResponse(c, err, 400, utils.ErrorCodeRequired)
 	}
-	utils.SuccessResponse(c, nil,models.Meta{})
+	utils.SuccessResponse(c, nil, models.Meta{})
 }
 
 // GET /Orders
@@ -51,9 +51,9 @@ func OrdersList(c *gin.Context) {
 	err = repositories.GetDB().QueryRow(c, query).Scan(&totalUsers)
 
 	utils.SuccessResponse(c, list, models.Meta{
-		Total: totalUsers,
-		Limit: filter.Limit,
-		Offset:filter.Offset,
+		Total:  totalUsers,
+		Limit:  filter.Limit,
+		Offset: filter.Offset,
 	})
 
 }
@@ -115,6 +115,6 @@ func OrdersRoutes(rg *gin.RouterGroup) {
 	rg.GET("/admin/orders", OrdersList)
 	rg.DELETE("/admin/orders/:id", OrdersDelete)
 	rg.PUT("/admin/orders/:id", OrdersUpdate)
-	rg.GET("/admin/orders/get/:id", GetOrder)
+	rg.GET("/admin/orders/:id", GetOrder)
 
 }
