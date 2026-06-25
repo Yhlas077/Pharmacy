@@ -28,8 +28,8 @@ func UserList(c context.Context, f UserFilter) ([]models.User, error) {
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 	if f.Search != "" {
-		sqlArgs = append(sqlArgs, f.Search)
-		sqlWhere += ` and (first_name ilike '%$` + LenStr(sqlArgs) + `%')`
+		sqlArgs = append(sqlArgs, "%"+f.Search+"%")
+		sqlWhere += `and name ilike $3`
 
 	}
 	if f.Role != "" {

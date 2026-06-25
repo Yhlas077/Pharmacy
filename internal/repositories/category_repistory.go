@@ -27,13 +27,13 @@ func CategoryList(c context.Context, f CategoryFilter) ([]models.Category, error
 	sqlWhere := ` `
 	sqlArgs := []any{f.Limit, f.Offset}
 	if f.Search != "" {
-		sqlArgs = append(sqlArgs, f.Search)
-		sqlWhere += `and (name ilike '%$` + LenStrcategory(sqlArgs) + `%')`
+		sqlArgs = append(sqlArgs, "%"+f.Search+"%")
+		sqlWhere += `and name ilike $3`
 	}
 
 	rows, err := db.Query(c, `select id, name
 		from categories
-			where 1=1 `+sqlWhere+`
+		where 1=1 ` + sqlWhere + `
 		limit $1 offset $2`, sqlArgs...)
 	if err != nil {
 		return nil, err

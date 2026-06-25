@@ -28,7 +28,7 @@ func PharmacyMedicineList(c context.Context, f PharmacyMedicineFilter) ([]models
 	sqlArgs := []any{f.Limit, f.Offset}
 	if f.Search != "" {
 		sqlArgs = append(sqlArgs, "%"+f.Search+"%")
-		sqlWhere += `and (name ilike $` + LenStrpharmacymedicine(sqlArgs) + `%')`
+		sqlWhere += `and name ilike $3`
 	}
 
 	rows, err := db.Query(c, `select id, name, description, price, new_price, category_id

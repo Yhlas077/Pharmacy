@@ -28,9 +28,8 @@ func PharmacyList(c context.Context, f PharmacyFilter) ([]models.Pharmacies, err
 	sqlArgs := []any{f.Limit, f.Offset}
 
 	if f.Search != "" {
-		sqlArgs = append(sqlArgs, f.Search)
-		sqlWhere += ` and (first_name ilike '%$` + LengthStr(sqlArgs) + `%')`
-
+		sqlArgs = append(sqlArgs, "%"+f.Search+"%")
+		sqlWhere += `and name ilike $3`
 	}
 
 	rows, err := db.Query(c, `select id, name, address, pharmacy_hours
