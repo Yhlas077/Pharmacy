@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -118,7 +117,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		expiresAt, err := repositories.GetExpiresAtByToken(ctx, token)
-		log.Println(expiresAt, err)
 		if err != nil || expiresAt.Before(time.Now()) {
 			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 				Success: false, ErrorMsg: "token expired",
