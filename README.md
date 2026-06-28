@@ -21,7 +21,7 @@ Taslama aşakdaky professional gural we paketler arkaly gurlady:
 ```text
 ├── config/             # DB baglanyşygy we sazlamalar
 ├── controllers/        # Request-Response dolandyryjylary (Handlers)
-├── middleware/         # JWT Auth we ygtyýarlylandyryş kontroly
+├── repositories/         # JWT Auth we ygtyýarlylandyryş kontroly
 ├── models/             # PostgreSQL şablonlary (GORM Structs)
 ├── routes/             # API salgylarynyň paýlanyşy we toparlanmasy
 ├── .env                # Gizlin maglumatlar (Git-e goşulmaýar ❌)
